@@ -158,12 +158,16 @@ app.post("/api/predict-price", async (req, res) => {
     }
 });
 
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
+});
+
 // --------------------- ERROR HANDLERS ---------------------
 app.use(notFoundHandler);
 app.use(errorHandler);
 
 // --------------------- SERVER ---------------------
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT ||10000;
 
 const server = app.listen(PORT, () => {
     console.log(`🚀 PlanMyStay Server running on port ${PORT}`);
