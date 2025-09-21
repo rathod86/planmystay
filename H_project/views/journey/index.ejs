@@ -1,0 +1,1002 @@
+<% layout("/layouts/boilerplate.ejs")%>
+
+<div class="container-fluid">
+    <!-- Hero Section -->
+    <div class="row bg-gradient text-white py-5 mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="col-12 text-center">
+            <h1 class="display-4 mb-3 fw-bold">🗺️ Discover Amazing Places</h1>
+            <p class="lead fs-4">Find the perfect spots for your night out, vacation, picnic, or tour</p>
+            <div class="mt-4">
+                <span class="badge bg-light text-dark me-2 fs-6">🌙 Night Out</span>
+                <span class="badge bg-light text-dark me-2 fs-6">🏖️ Vacation</span>
+                <span class="badge bg-light text-dark me-2 fs-6">🧺 Picnic</span>
+                <span class="badge bg-light text-dark fs-6">🎯 Tour</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4">
+                    <h5 class="card-title text-primary mb-4">
+                        <i class="fas fa-compass me-2"></i>Quick Access
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-primary btn-lg w-100" onclick="loadPlacesByType('night_out')" data-original-text="<i class='fas fa-moon me-2'></i>Night Out Places">
+                                <i class="fas fa-moon me-2"></i>Night Out Places
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-success btn-lg w-100" onclick="loadPlacesByType('vacation')" data-original-text="<i class='fas fa-umbrella-beach me-2'></i>Vacation Spots">
+                                <i class="fas fa-umbrella-beach me-2"></i>Vacation Spots
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-info btn-lg w-100" onclick="loadPlacesByType('picnic')" data-original-text="<i class='fas fa-basket-shopping me-2'></i>Picnic Areas">
+                                <i class="fas fa-basket-shopping me-2"></i>Picnic Areas
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-warning btn-lg w-100" onclick="loadPlacesByType('tour')" data-original-text="<i class='fas fa-map-marked-alt me-2'></i>Tourist Spots">
+                                <i class="fas fa-map-marked-alt me-2"></i>Tourist Spots
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nearby Attractions Quick Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-location-dot me-2"></i>Nearby Attractions
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <button class="btn btn-light w-100 text-start py-3" onclick="onAttractionClick('Mountain View', 'A scenic viewpoint offering panoramic vistas.')">
+                                <i class="fas fa-mountain text-primary me-2"></i>
+                                <strong>Mountain View</strong>
+                                <div class="small text-muted">Tap to view details and directions</div>
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-light w-100 text-start py-3" onclick="onAttractionClick('Local Restaurant', 'Popular local restaurant known for great food.')">
+                                <i class="fas fa-utensils text-success me-2"></i>
+                                <strong>Local Restaurant</strong>
+                                <div class="small text-muted">Tap to view details and directions</div>
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-light w-100 text-start py-3" onclick="onAttractionClick('Shopping Mall', 'Modern shopping mall with various stores and entertainment.')">
+                                <i class="fas fa-shopping-bag text-warning me-2"></i>
+                                <strong>Shopping Mall</strong>
+                                <div class="small text-muted">Tap to view details and directions</div>
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-light w-100 text-start py-3" onclick="onAttractionClick('Bus Station', 'Nearest bus station for convenient transit.')">
+                                <i class="fas fa-bus text-info me-2"></i>
+                                <strong>Bus Station</strong>
+                                <div class="small text-muted">Tap to view details and directions</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Journey Map Section (shown after destination is entered) -->
+    <div class="row mb-4" id="journey-map-card" style="display:none;">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-0">
+                    <div class="p-3 d-flex align-items-center justify-content-between">
+                        <h5 class="card-title text-primary mb-0">
+                            <i class="fas fa-route me-2"></i>Your Route
+                        </h5>
+                        <div class="small text-muted" id="live-coords"></div>
+                    </div>
+                    <div id="journey-map" style="height: 520px; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Place Details Modal -->
+    <div class="modal fade" id="placeDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="placeModalTitle">Place Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-1"><strong>Distance:</strong> <span id="placeModalDistance">-</span></p>
+                    <p class="mb-3" id="placeModalDesc"></p>
+                    <div class="alert alert-info mb-0"><i class="fas fa-route me-2"></i>Directions are drawn on the map below.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a id="placeModalOpenMaps" href="#" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-directions me-2"></i>Open in Google Maps
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row">
+        <div class="col-12">
+            <div id="searchResults" class="row g-4">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="text-center" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- No Results Message -->
+    <div id="noResults" class="text-center text-muted" style="display: none;">
+        <h4>No places found</h4>
+        <p>Try adjusting your search criteria or <a href="/seed-journey" target="_blank">load sample data</a></p>
+    </div>
+
+    <!-- Journey Enjoyment Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="journey-enjoyment-section">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <div class="journey-content">
+                                <h2 class="journey-title">
+                                    <i class="fas fa-heart me-3"></i>Journey & Enjoy Your Life
+                                </h2>
+                                <p class="journey-subtitle">
+                                    Life is a beautiful journey filled with amazing experiences waiting to be discovered. 
+                                    Every destination has a story, every moment creates memories, and every adventure 
+                                    shapes who you become.
+                                </p>
+                                <div class="journey-quotes">
+                                    <blockquote class="journey-quote">
+                                        "The world is a book, and those who do not travel read only one page."
+                                        <cite>- Saint Augustine</cite>
+                                    </blockquote>
+                                </div>
+                                <div class="journey-actions">
+                                    <button onclick="startJourney()" class="btn btn-journey-primary btn-lg me-3">
+                                        <i class="fas fa-rocket me-2"></i>Start Your Journey
+                                    </button>
+                                    <button onclick="shareJourney()" class="btn btn-journey-secondary btn-lg">
+                                        <i class="fas fa-share-alt me-2"></i>Share Your Story
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="journey-visual">
+                                <div class="journey-cards">
+                                    <div class="journey-card journey-card-1">
+                                        <i class="fas fa-mountain"></i>
+                                        <span>Adventure</span>
+                                    </div>
+                                    <div class="journey-card journey-card-2">
+                                        <i class="fas fa-camera"></i>
+                                        <span>Memories</span>
+                                    </div>
+                                    <div class="journey-card journey-card-3">
+                                        <i class="fas fa-users"></i>
+                                        <span>Friends</span>
+                                    </div>
+                                    <div class="journey-card journey-card-4">
+                                        <i class="fas fa-star"></i>
+                                        <span>Dreams</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Journey Enjoyment Section */
+.journey-enjoyment-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.journey-enjoyment-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="journey-pattern" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="40" cy="40" r="1" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23journey-pattern)"/></svg>');
+    opacity: 0.3;
+}
+
+.journey-content {
+    position: relative;
+    z-index: 1;
+}
+
+.journey-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.journey-subtitle {
+    font-size: 1.3rem;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+}
+
+.journey-quotes {
+    margin-bottom: 2.5rem;
+}
+
+.journey-quote {
+    font-style: italic;
+    font-size: 1.1rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    border-left: 4px solid #ff6b6b;
+    margin: 0;
+}
+
+.journey-quote cite {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.journey-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-journey-primary {
+    background: linear-gradient(135deg, #ff6b6b, #feca57) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 15px 30px;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-journey-primary:hover {
+    background: linear-gradient(135deg, #ff5252, #ffb74d) !important;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
+}
+
+.btn-journey-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-journey-primary:hover::before {
+    left: 100%;
+}
+
+.btn-journey-secondary {
+    background: transparent !important;
+    border: 2px solid white !important;
+    color: white !important;
+    font-weight: 600;
+    padding: 15px 30px;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+}
+
+.btn-journey-secondary:hover {
+    background: white !important;
+    color: #667eea !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3);
+}
+
+.journey-visual {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.journey-cards {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto;
+}
+
+.journey-card {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    animation: journeyFloat 4s ease-in-out infinite;
+}
+
+.journey-card i {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.journey-card:hover {
+    transform: scale(1.1);
+    background: rgba(255, 107, 107, 0.3);
+    box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+}
+
+.journey-card-1 {
+    top: 20px;
+    left: 50px;
+    animation-delay: 0s;
+}
+
+.journey-card-2 {
+    top: 20px;
+    right: 50px;
+    animation-delay: 1s;
+}
+
+.journey-card-3 {
+    bottom: 20px;
+    left: 50px;
+    animation-delay: 2s;
+}
+
+.journey-card-4 {
+    bottom: 20px;
+    right: 50px;
+    animation-delay: 3s;
+}
+
+@keyframes journeyFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .journey-title {
+        font-size: 2.5rem;
+    }
+    
+    .journey-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .journey-actions {
+        justify-content: center;
+    }
+    
+    .journey-cards {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .journey-card {
+        width: 60px;
+        height: 60px;
+        font-size: 0.8rem;
+    }
+    
+    .journey-card i {
+        font-size: 1.2rem;
+    }
+}
+
+/* Dark mode specific styles for journey page */
+[data-theme="dark"] .bg-gradient {
+    background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%) !important;
+}
+
+[data-theme="dark"] .card {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important;
+}
+
+[data-theme="dark"] .card-title {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .card-text {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .form-control {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .form-control:focus {
+    background: var(--bg-secondary) !important;
+    border-color: var(--accent-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .form-label {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .text-muted {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .text-primary {
+    color: var(--accent-primary) !important;
+}
+
+[data-theme="dark"] .text-success {
+    color: var(--accent-secondary) !important;
+}
+
+[data-theme="dark"] .alert-danger {
+    background-color: rgba(220, 53, 69, 0.2) !important;
+    border-color: var(--accent-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .spinner-border {
+    color: var(--accent-primary) !important;
+}
+</style>
+
+<script>
+async function startJourney() {
+    const button = event.target;
+    const originalText = button.innerHTML;
+    try {
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Preparing...';
+        button.disabled = true;
+
+        // Ask destination first
+        const destination = prompt('Enter your destination (e.g., Marine Drive, Mumbai):');
+        if (!destination) {
+            return;
+        }
+
+        // Geolocate user
+        const position = await new Promise((resolve, reject) => {
+            if (!navigator.geolocation) return reject(new Error('Geolocation not supported'));
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
+        });
+
+        const userLng = position.coords.longitude;
+        const userLat = position.coords.latitude;
+
+        // Show map card
+        document.getElementById('journey-map-card').style.display = 'block';
+
+        // Init map
+        mapboxgl.accessToken = window.MAP_TOKEN || '';
+        const map = new mapboxgl.Map({
+            container: 'journey-map',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: [userLng, userLat],
+            zoom: 12
+        });
+        map.addControl(new mapboxgl.NavigationControl());
+        map.addControl(new mapboxgl.FullscreenControl());
+
+        // Add user marker
+        const userMarker = new mapboxgl.Marker({ color: '#0d6efd' }).setLngLat([userLng, userLat]).addTo(map);
+
+        // Geocode destination
+        const geoRes = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(destination)}.json?access_token=${mapboxgl.accessToken}&limit=1`);
+        const geoData = await geoRes.json();
+        if (!geoData.features || geoData.features.length === 0) {
+            alert('Destination not found. Please try another place.');
+            return;
+        }
+        const dest = geoData.features[0];
+        const [destLng, destLat] = dest.center;
+
+        // Add destination marker
+        const destMarker = new mapboxgl.Marker({ color: '#dc3545' })
+            .setLngLat([destLng, destLat])
+            .setPopup(new mapboxgl.Popup().setHTML(`<strong>${dest.text}</strong><br/><small>${dest.place_name}</small>`))
+            .addTo(map);
+
+        // Fit bounds
+        const bounds = new mapboxgl.LngLatBounds();
+        bounds.extend([userLng, userLat]);
+        bounds.extend([destLng, destLat]);
+        map.fitBounds(bounds, { padding: 60 });
+
+        // Get route from Directions API
+        const dirUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${userLng},${userLat};${destLng},${destLat}?geometries=geojson&overview=full&access_token=${mapboxgl.accessToken}`;
+        const dirRes = await fetch(dirUrl);
+        const dirData = await dirRes.json();
+        const route = dirData.routes && dirData.routes[0];
+        if (!route) {
+            alert('Could not get route.');
+            return;
+        }
+
+        map.on('load', () => {
+            // Add route line
+            map.addSource('route', { type: 'geojson', data: { type: 'Feature', geometry: route.geometry } });
+            map.addLayer({
+                id: 'route-line',
+                type: 'line',
+                source: 'route',
+                layout: { 'line-join': 'round', 'line-cap': 'round' },
+                paint: { 'line-color': '#3b82f6', 'line-width': 5 }
+            });
+        });
+
+        // Update coords text
+        const infoEl = document.getElementById('live-coords');
+        if (infoEl) infoEl.textContent = `Lat: ${userLat.toFixed(5)}, Lng: ${userLng.toFixed(5)}`;
+
+        button.innerHTML = '<i class="fas fa-check me-2"></i>Route Ready';
+        setTimeout(() => { button.innerHTML = originalText; button.disabled = false; }, 1200);
+    } catch (err) {
+        console.error(err);
+        alert(err.message || 'Failed to start journey');
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }
+}
+
+function shareJourney() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'My Journey with PlanMyStay',
+            text: 'Check out this amazing travel platform!',
+            url: window.location.href
+        });
+    } else {
+        // Fallback for browsers that don't support Web Share API
+        const shareText = `Check out this amazing travel platform: ${window.location.href}`;
+        navigator.clipboard.writeText(shareText).then(() => {
+            alert('Link copied to clipboard! Share it with your friends.');
+        });
+    }
+}
+
+// Add click effects to journey cards
+document.addEventListener('DOMContentLoaded', function() {
+    const journeyCards = document.querySelectorAll('.journey-card');
+    
+    journeyCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Add pulse effect
+            this.style.animation = 'none';
+            this.offsetHeight; // Trigger reflow
+            this.style.animation = 'journeyFloat 0.6s ease-in-out';
+            
+            // Add motivational message
+            const messages = [
+                "Adventure awaits! 🌟",
+                "Create amazing memories! 📸",
+                "Make new friends! 👥",
+                "Follow your dreams! ⭐"
+            ];
+            
+            const messageIndex = Array.from(journeyCards).indexOf(this);
+            const message = messages[messageIndex] || "Keep exploring! 🚀";
+            
+            // Show temporary message
+            const originalContent = this.innerHTML;
+            this.innerHTML = `<i class="fas fa-heart"></i><span>${message}</span>`;
+            
+            setTimeout(() => {
+                this.innerHTML = originalContent;
+            }, 2000);
+        });
+    });
+});
+</script>
+
+<script>
+// Helper: Haversine distance (km)
+function haversineKm(lat1, lon1, lat2, lon2) {
+    const toRad = d => (d * Math.PI) / 180;
+    const R = 6371; // km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+let journeyMapInstance = null;
+let hasLoadedRouteLayer = false;
+
+// Click handler for Nearby Attraction buttons
+async function onAttractionClick(name, description) {
+    try {
+        // Ensure map card visible
+        document.getElementById('journey-map-card').style.display = 'block';
+
+        // Geolocate user
+        const pos = await new Promise((resolve, reject) => {
+            if (!navigator.geolocation) return reject(new Error('Geolocation not supported'));
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
+        });
+        const userLng = pos.coords.longitude;
+        const userLat = pos.coords.latitude;
+
+        mapboxgl.accessToken = window.MAP_TOKEN || '';
+        // Initialize map once
+        if (!journeyMapInstance) {
+            journeyMapInstance = new mapboxgl.Map({
+                container: 'journey-map',
+                style: 'mapbox://styles/mapbox/streets-v12',
+                center: [userLng, userLat],
+                zoom: 13
+            });
+            journeyMapInstance.addControl(new mapboxgl.NavigationControl());
+            journeyMapInstance.addControl(new mapboxgl.FullscreenControl());
+            journeyMapInstance.on('load', () => { hasLoadedRouteLayer = true; });
+        }
+
+        // Update coords text
+        const infoEl = document.getElementById('live-coords');
+        if (infoEl) infoEl.textContent = `Lat: ${userLat.toFixed(5)}, Lng: ${userLng.toFixed(5)}`;
+
+        // Geocode the requested place near the user
+        const query = encodeURIComponent(name);
+        const proximity = `${userLng},${userLat}`;
+        const geoUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?proximity=${proximity}&limit=1&access_token=${mapboxgl.accessToken}`;
+        const geoRes = await fetch(geoUrl);
+        const geoData = await geoRes.json();
+        if (!geoData.features || geoData.features.length === 0) {
+            alert('Could not find that place nearby.');
+            return;
+        }
+        const feat = geoData.features[0];
+        const [destLng, destLat] = feat.center;
+
+        // Compute distance
+        const distKm = haversineKm(userLat, userLng, destLat, destLng);
+
+        // Show modal
+        document.getElementById('placeModalTitle').textContent = feat.text || name;
+        document.getElementById('placeModalDistance').textContent = `${distKm.toFixed(1)} km away`;
+        document.getElementById('placeModalDesc').textContent = description || feat.place_name || '';
+        const gmapsUrl = `https://www.google.com/maps/dir/${userLat},${userLng}/${destLat},${destLng}`;
+        document.getElementById('placeModalOpenMaps').href = gmapsUrl;
+        new bootstrap.Modal(document.getElementById('placeDetailsModal')).show();
+
+        // Draw markers and route on the map
+        // Clear existing route source/layer if present
+        if (journeyMapInstance.getLayer('route-line')) {
+            journeyMapInstance.removeLayer('route-line');
+        }
+        if (journeyMapInstance.getSource('route')) {
+            journeyMapInstance.removeSource('route');
+        }
+
+        // Add/update markers
+        new mapboxgl.Marker({ color: '#0d6efd' }).setLngLat([userLng, userLat]).addTo(journeyMapInstance);
+        new mapboxgl.Marker({ color: '#dc3545' })
+            .setLngLat([destLng, destLat])
+            .setPopup(new mapboxgl.Popup().setHTML(`<strong>${feat.text}</strong><br/><small>${feat.place_name}</small>`))
+            .addTo(journeyMapInstance);
+
+        // Fit bounds
+        const bounds = new mapboxgl.LngLatBounds();
+        bounds.extend([userLng, userLat]);
+        bounds.extend([destLng, destLat]);
+        journeyMapInstance.fitBounds(bounds, { padding: 60 });
+
+        // Fetch directions
+        const dirUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${userLng},${userLat};${destLng},${destLat}?geometries=geojson&overview=full&access_token=${mapboxgl.accessToken}`;
+        const dirRes = await fetch(dirUrl);
+        const dirData = await dirRes.json();
+        const route = dirData.routes && dirData.routes[0];
+        if (!route) return;
+
+        const addRoute = () => {
+            if (journeyMapInstance.getSource('route')) {
+                journeyMapInstance.getSource('route').setData({ type: 'Feature', geometry: route.geometry });
+            } else {
+                journeyMapInstance.addSource('route', { type: 'geojson', data: { type: 'Feature', geometry: route.geometry } });
+                journeyMapInstance.addLayer({
+                    id: 'route-line',
+                    type: 'line',
+                    source: 'route',
+                    layout: { 'line-join': 'round', 'line-cap': 'round' },
+                    paint: { 'line-color': '#3b82f6', 'line-width': 5 }
+                });
+            }
+        };
+
+        if (journeyMapInstance.isStyleLoaded()) addRoute();
+        else journeyMapInstance.once('load', addRoute);
+    } catch (e) {
+        console.error(e);
+        alert(e.message || 'Failed to load place details');
+    }
+}
+// Load places by type
+async function loadPlacesByType(type) {
+    showLoading();
+    
+    // Add loading state to the clicked button
+    const buttons = document.querySelectorAll('[onclick*="loadPlacesByType"]');
+    buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+    });
+    
+    try {
+        console.log('Loading places of type:', type);
+        
+        const response = await fetch(`/journey/type/${type}`);
+        const data = await response.json();
+        
+        console.log('Type response:', data);
+        if (data.success) {
+            displayResults(data.places);
+        } else {
+            showError('Failed to load places: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Load places error:', error);
+        showError('Failed to load places. Please try again.');
+    } finally {
+        // Reset button states
+        buttons.forEach(btn => {
+            btn.disabled = false;
+            const originalText = btn.getAttribute('data-original-text') || btn.innerHTML;
+            btn.innerHTML = originalText;
+        });
+    }
+}
+
+// Search nearby places
+async function searchNearby() {
+    const lat = document.getElementById('latitude').value;
+    const lng = document.getElementById('longitude').value;
+    const type = document.getElementById('nearbyType').value;
+    const radius = document.getElementById('radius').value;
+    
+    if (!lat || !lng) {
+        alert('Please enter latitude and longitude');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const params = new URLSearchParams();
+        params.append('latitude', lat);
+        params.append('longitude', lng);
+        if (type) params.append('type', type);
+        if (radius) params.append('radius', radius);
+        
+        const response = await fetch(`/api/journey/nearest?${params}`);
+        const data = await response.json();
+        
+        displayResults(data.places);
+    } catch (error) {
+        console.error('Nearby search error:', error);
+        showError('Failed to find nearby places. Try <a href="/seed-journey" target="_blank">loading sample data</a> first.');
+    }
+}
+
+// Get current location
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
+            document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
+        }, function(error) {
+            alert('Unable to get your location: ' + error.message);
+        });
+    } else {
+        alert('Geolocation is not supported by this browser');
+    }
+}
+
+// Display search results
+function displayResults(places) {
+    const resultsContainer = document.getElementById('searchResults');
+    const noResults = document.getElementById('noResults');
+    
+    hideLoading();
+    
+    if (!places || places.length === 0) {
+        resultsContainer.innerHTML = '';
+        noResults.style.display = 'block';
+        return;
+    }
+    
+    noResults.style.display = 'none';
+    
+    resultsContainer.innerHTML = places.map(place => `
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-lg border-0 hover-card" style="transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                <div class="card-img-top bg-light position-relative" style="height: 220px; background-image: url('${place.images && place.images[0] ? place.images[0].url : 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500'}'); background-size: cover; background-position: center; border-radius: 0.375rem 0.375rem 0 0;">
+                    <div class="card-img-overlay d-flex justify-content-between align-items-start p-3">
+                        <span class="badge bg-${getTypeColor(place.type)} fs-6 px-3 py-2">${getTypeEmoji(place.type)} ${place.type.charAt(0).toUpperCase() + place.type.slice(1).replace('_', ' ')}</span>
+                        <span class="badge bg-warning text-dark fs-6 px-3 py-2">⭐ ${place.rating.average.toFixed(1)}</span>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-bold text-dark mb-2">${place.name}</h5>
+                    <p class="card-text text-muted mb-2">
+                        <i class="fas fa-map-marker-alt me-1"></i>${place.location.name}
+                    </p>
+                    <p class="card-text text-secondary mb-3">${place.description.substring(0, 120)}...</p>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="h5 text-primary fw-bold">₹${place.pricing.basePrice.toLocaleString('en-IN')} <small class="text-muted">${place.pricing.pricingType.replace('_', '/')}</small></span>
+                        <small class="text-muted">
+                            <i class="fas fa-users me-1"></i>Up to ${place.capacity.max}
+                        </small>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                    <button class="btn btn-primary w-100 btn-lg" onclick="viewPlaceDetails('${place._id}')">
+                        <i class="fas fa-eye me-2"></i>View Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Get color for place type
+function getTypeColor(type) {
+    const colors = {
+        'night_out': 'primary',
+        'vacation': 'success',
+        'picnic': 'info',
+        'tour': 'warning'
+    };
+    return colors[type] || 'secondary';
+}
+
+// Get emoji for place type
+function getTypeEmoji(type) {
+    const emojis = {
+        'night_out': '🌙',
+        'vacation': '🏖️',
+        'picnic': '🧺',
+        'tour': '🎯'
+    };
+    return emojis[type] || '📍';
+}
+
+// View place details
+function viewPlaceDetails(placeId) {
+    window.open(`/api/journey/${placeId}/view`, '_blank');
+}
+
+// Show loading spinner
+function showLoading() {
+    document.getElementById('loadingSpinner').style.display = 'block';
+    document.getElementById('searchResults').innerHTML = '';
+    document.getElementById('noResults').style.display = 'none';
+}
+
+// Hide loading spinner
+function hideLoading() {
+    document.getElementById('loadingSpinner').style.display = 'none';
+}
+
+// Show error message
+function showError(message) {
+    hideLoading();
+    document.getElementById('searchResults').innerHTML = `
+        <div class="col-12">
+            <div class="alert alert-danger" role="alert">
+                ${message}
+            </div>
+        </div>
+    `;
+}
+
+// Load popular places on page load
+window.addEventListener('load', async function() {
+    try {
+        const response = await fetch('/api/journey/popular?limit=6');
+        const data = await response.json();
+        if (data.places && data.places.length > 0) {
+            displayResults(data.places);
+        }
+    } catch (error) {
+        console.error('Error loading popular places:', error);
+    }
+});
+
+// Add hover effects
+document.addEventListener('DOMContentLoaded', function() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-1px);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            border: none;
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #4a9a1f 0%, #98d6bf 100%);
+            transform: translateY(-1px);
+        }
+        .card {
+            border-radius: 15px;
+        }
+        .badge {
+            border-radius: 20px;
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>

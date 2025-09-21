@@ -1,0 +1,44 @@
+<nav class="navbar navbar-expand-md bg-body-tertiary border-bottom sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">
+        <i class="fa-regular fa-compass me-2"></i>
+        <span class="brand-text">PlanMyStay</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-link "  href="/">Home</a>
+        <a class="nav-link" href="/listings">All Listing</a>
+        <a class="nav-link" href="/listings/new">Add new listing</a>
+        <a class="nav-link" href="/services">Services</a>
+        <a class="nav-link" href="/journey">Journey</a>
+        
+      </div>
+      <div class="navbar-nav ms-auto">
+        <!-- Dark/Light Mode Toggle -->
+        <div class="nav-item me-3">
+          <button id="theme-toggle" class="btn btn-theme-toggle" title="Toggle Dark/Light Mode">
+            <i class="fas fa-moon" id="theme-icon"></i>
+          </button>
+        </div>
+        
+        <% if (typeof listing !== 'undefined' && listing && listing.media) { %>
+          <% if (listing.media.instagram) { %>
+            <a class="nav-link" target="_blank" href="<%= listing.media.instagram %>"><i class="fab fa-instagram"></i></a>
+          <% } %>
+          <% if (listing.media.facebook) { %>
+            <a class="nav-link" target="_blank" href="<%= listing.media.facebook %>"><i class="fab fa-facebook"></i></a>
+          <% } %>
+        <% } %>
+        <% if(!currentUser){ %>
+          <a class="nav-link" href="/users/signup">Sign Up</a>
+          <a class="nav-link" href="/users/login">Login</a>
+        <% } else { %>
+          <span class="nav-link">Hello, <%= currentUser.username %></span>
+          <a class="nav-link" href="/users/logout">Logout</a>
+        <% } %>
+      </div>
+  </div>
+</nav>

@@ -1,0 +1,700 @@
+<% layout('layouts/boilerplate') %>
+
+<!-- Hero Section -->
+<div class="services-hero py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold text-white mb-4">
+                    <i class="fas fa-star me-3"></i>Amazing Services
+                </h1>
+                <p class="lead text-white mb-4">
+                    Discover what makes our properties special. From delicious meals to relaxing therapies, 
+                    we provide everything you need for a perfect stay.
+                </p>
+                <button onclick="scrollToServices()" class="btn btn-warning btn-lg">
+                    <i class="fas fa-arrow-down me-2"></i>Explore Services
+                </button>
+            </div>
+            <div class="col-lg-6">
+                <div class="services-illustration">
+                    <div class="service-icon-large">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Services Grid -->
+<div class="container py-5" id="servicesGrid">
+    <div class="row text-center mb-5">
+        <div class="col-12">
+            <h2 class="section-title">Our Premium Services</h2>
+            <p class="section-subtitle">Choose from our wide range of services to enhance your experience</p>
+        </div>
+    </div>
+
+    <!-- Service Categories -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="service-category-card" onclick="filterServices('food')">
+                <div class="service-category-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h5>Food & Dining</h5>
+                <p>Delicious meals delivered to your room</p>
+                <button class="service-category-btn">Order Now</button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="service-category-card" onclick="filterServices('wellness')">
+                <div class="service-category-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h5>Wellness</h5>
+                <p>Yoga, massage, and spa services</p>
+                <button class="service-category-btn">Book Session</button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="service-category-card" onclick="filterServices('sports')">
+                <div class="service-category-icon">
+                    <i class="fas fa-futbol"></i>
+                </div>
+                <h5>Sports & Activities</h5>
+                <p>Indoor and outdoor sports facilities</p>
+                <button class="service-category-btn">Join Now</button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="service-category-card" onclick="filterServices('events')">
+                <div class="service-category-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h5>Events</h5>
+                <p>Special events and celebrations</p>
+                <button class="service-category-btn">Plan Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Properties with Services -->
+    <div class="row g-4">
+        <% latest.forEach(l => { %>
+            <div class="col-md-4 col-lg-3">
+                <div class="service-property-card" onclick="window.location.href='/listings/<%= l._id %>'">
+                    <div class="service-property-image">
+                        <img src="<%= l.image?.url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=250&fit=crop' %>" alt="<%= l.title %>">
+                        <div class="service-property-overlay">
+                            <button class="btn btn-primary btn-sm">View Details</button>
+                        </div>
+                    </div>
+                    <div class="service-property-content">
+                        <h6 class="service-property-title"><%= l.title %></h6>
+                        <div class="service-badges">
+                            <% if (l.services?.sportsGroundForRent?.available) { %>
+                                <span class="badge bg-success">🏟️ Sports Ground</span>
+                            <% } %>
+                            <% if (l.services?.chef?.available) { %>
+                                <span class="badge bg-danger">👨‍🍳 Chef</span>
+                            <% } %>
+                            <% if (l.services?.training?.gym?.available) { %>
+                                <span class="badge bg-primary">💪 Gym</span>
+                            <% } %>
+                            <% if (l.services?.massage?.available) { %>
+                                <span class="badge bg-info">🧘 Massage</span>
+                            <% } %>
+                        </div>
+                        <div class="service-property-actions">
+                            <button class="btn btn-outline-primary btn-sm">Book Now</button>
+                            <button class="btn btn-outline-secondary btn-sm">Learn More</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <div class="services-cta">
+                <h3 class="mb-3">Ready to Experience Our Services?</h3>
+                <p class="mb-4">Book your stay and enjoy all our premium services</p>
+                <button onclick="window.location.href='/listings'" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-search me-2"></i>Find Properties
+                </button>
+                <button onclick="window.location.href='/listings/new'" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Add Your Property
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Services Hero Section */
+.services-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.services-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+
+.services-illustration {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.service-icon-large {
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 4rem;
+    color: white;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Service Category Cards */
+.service-category-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.service-category-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border-color: #ff6b6b;
+}
+
+.service-category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(254, 202, 87, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.service-category-card:hover::before {
+    opacity: 1;
+}
+
+.service-category-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #ff6b6b, #feca57);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    color: white;
+    position: relative;
+    z-index: 1;
+}
+
+.service-category-card h5 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #333;
+    position: relative;
+    z-index: 1;
+}
+
+.service-category-card p {
+    color: #666;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.service-category-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.service-category-btn:hover {
+    background: linear-gradient(135deg, #5a6fd8, #6a4190);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* Service Property Cards */
+.service-property-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    height: 100%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.service-property-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+.service-property-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.service-property-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.service-property-card:hover .service-property-image img {
+    transform: scale(1.1);
+}
+
+.service-property-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.service-property-card:hover .service-property-overlay {
+    opacity: 1;
+}
+
+.service-property-content {
+    padding: 1.5rem;
+}
+
+.service-property-title {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.service-badges {
+    margin-bottom: 1rem;
+}
+
+.service-badges .badge {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 15px;
+}
+
+.service-property-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.service-property-actions .btn {
+    flex: 1;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+}
+
+/* Services CTA */
+.services-cta {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 3rem;
+    border-radius: 20px;
+    border: 2px solid #ff6b6b;
+}
+
+.services-cta h3 {
+    color: #333;
+    font-weight: 700;
+}
+
+.services-cta p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Section Titles */
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #333;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.section-subtitle {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .service-icon-large {
+        width: 150px;
+        height: 150px;
+        font-size: 3rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .service-category-card {
+        padding: 1.5rem;
+    }
+}
+</style>
+
+<script>
+function scrollToServices() {
+    document.getElementById('servicesGrid').scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+    });
+}
+
+function filterServices(category) {
+    // Redirect to listings page with service filter
+    switch(category) {
+        case 'food':
+            // Show food ordering modal or redirect to listings with food filter
+            showFoodOrderModal();
+            break;
+        case 'wellness':
+            // Show wellness booking modal or redirect to listings with wellness filter
+            showWellnessBookingModal();
+            break;
+        case 'sports':
+            // Show sports booking modal or redirect to listings with sports filter
+            showSportsBookingModal();
+            break;
+        case 'events':
+            // Show events planning modal or redirect to listings with events filter
+            showEventsPlanningModal();
+            break;
+        default:
+            // Default behavior - scroll to services
+            scrollToServices();
+    }
+}
+
+function showFoodOrderModal() {
+    // Create and show food order modal
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'foodOrderModal';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-utensils me-2"></i>Food Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
+                        <h4>Order Delicious Food</h4>
+                        <p class="text-muted">Choose from our wide variety of cuisines</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-leaf fa-2x text-success mb-2"></i>
+                                        <h6>Vegetarian</h6>
+                                        <button class="btn btn-success btn-sm" onclick="orderFood('veg')">Order Now</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-drumstick-bite fa-2x text-danger mb-2"></i>
+                                        <h6>Non-Vegetarian</h6>
+                                        <button class="btn btn-danger btn-sm" onclick="orderFood('non-veg')">Order Now</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    modal.addEventListener('hidden.bs.modal', () => {
+        modal.remove();
+    });
+}
+
+function showWellnessBookingModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'wellnessBookingModal';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-leaf me-2"></i>Wellness Services</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <i class="fas fa-leaf fa-3x text-success mb-3"></i>
+                        <h4>Book Wellness Session</h4>
+                        <p class="text-muted">Relax and rejuvenate with our wellness services</p>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-dumbbell fa-2x text-primary mb-2"></i>
+                                        <h6>Yoga</h6>
+                                        <button class="btn btn-primary btn-sm" onclick="bookSession('yoga')">Book Session</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-fist-raised fa-2x text-danger mb-2"></i>
+                                        <h6>Karate</h6>
+                                        <button class="btn btn-danger btn-sm" onclick="bookSession('karate')">Book Session</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-dumbbell fa-2x text-info mb-2"></i>
+                                        <h6>Gym</h6>
+                                        <button class="btn btn-info btn-sm" onclick="bookSession('gym')">Book Session</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    modal.addEventListener('hidden.bs.modal', () => {
+        modal.remove();
+    });
+}
+
+function showSportsBookingModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'sportsBookingModal';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-futbol me-2"></i>Sports & Activities</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <i class="fas fa-futbol fa-3x text-warning mb-3"></i>
+                        <h4>Join Sports Activities</h4>
+                        <p class="text-muted">Stay active with our sports facilities</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-home fa-2x text-info mb-2"></i>
+                                        <h6>Indoor Sports</h6>
+                                        <button class="btn btn-info btn-sm" onclick="joinSports('indoor')">Join Now</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-sun fa-2x text-warning mb-2"></i>
+                                        <h6>Outdoor Sports</h6>
+                                        <button class="btn btn-warning btn-sm" onclick="joinSports('outdoor')">Join Now</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    modal.addEventListener('hidden.bs.modal', () => {
+        modal.remove();
+    });
+}
+
+function showEventsPlanningModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'eventsPlanningModal';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-calendar-alt me-2"></i>Plan Your Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <i class="fas fa-calendar-alt fa-3x text-primary mb-3"></i>
+                        <h4>Plan Special Events</h4>
+                        <p class="text-muted">Make your celebrations memorable</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-heart fa-2x text-danger mb-2"></i>
+                                        <h6>Wedding</h6>
+                                        <button class="btn btn-danger btn-sm" onclick="planEvent('wedding')">Plan Event</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-birthday-cake fa-2x text-warning mb-2"></i>
+                                        <h6>Birthday</h6>
+                                        <button class="btn btn-warning btn-sm" onclick="planEvent('birthday')">Plan Event</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    modal.addEventListener('hidden.bs.modal', () => {
+        modal.remove();
+    });
+}
+
+// Action functions
+function orderFood(type) {
+    alert(`Ordering ${type} food! This would integrate with the food ordering system.`);
+    bootstrap.Modal.getInstance(document.getElementById('foodOrderModal')).hide();
+}
+
+function bookSession(type) {
+    alert(`Booking ${type} session! This would integrate with the training booking system.`);
+    bootstrap.Modal.getInstance(document.getElementById('wellnessBookingModal')).hide();
+}
+
+function joinSports(type) {
+    alert(`Joining ${type} sports! This would integrate with the sports booking system.`);
+    bootstrap.Modal.getInstance(document.getElementById('sportsBookingModal')).hide();
+}
+
+function planEvent(type) {
+    alert(`Planning ${type} event! This would integrate with the events planning system.`);
+    bootstrap.Modal.getInstance(document.getElementById('eventsPlanningModal')).hide();
+}
+
+// Add click effects to all interactive elements
+document.addEventListener('DOMContentLoaded', function() {
+    const interactiveElements = document.querySelectorAll('.service-category-card, .service-property-card, .btn');
+    
+    interactiveElements.forEach(element => {
+        element.addEventListener('click', function(e) {
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+});
+</script>
+
+

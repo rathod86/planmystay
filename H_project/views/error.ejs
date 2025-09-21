@@ -1,0 +1,146 @@
+<% layout("/layouts/boilerplate.ejs")%>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white text-center">
+                    <h2 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error <%= error.statusCode %>
+                    </h2>
+                </div>
+                <div class="card-body text-center p-4">
+                    <div class="error-icon mb-3">
+                        <i class="fas fa-times-circle text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    
+                    <h4 class="text-danger mb-3"><%= error.message %></h4>
+                    
+                    <% if (error.statusCode === 404) { %>
+                        <p class="text-muted mb-4">
+                            The page you're looking for doesn't exist. 
+                            It might have been moved, deleted, or you entered the wrong URL.
+                        </p>
+                        <div class="mb-4">
+                            <a href="/listings" class="btn btn-primary me-2">
+                                <i class="fas fa-home me-1"></i> Go to Listings
+                            </a>
+                            <a href="/listings/new" class="btn btn-outline-primary me-2">
+                                <i class="fas fa-plus me-1"></i> Create New Listing
+                            </a>
+                            <a href="/journey" class="btn btn-outline-success">
+                                <i class="fas fa-map me-1"></i> Explore Places
+                            </a>
+                        </div>
+                    <% } else if (error.statusCode === 400) { %>
+                        <p class="text-muted mb-4">
+                            There was a problem with your request. 
+                            Please check your input and try again.
+                        </p>
+                        <div class="mb-4">
+                            <button onclick="history.back()" class="btn btn-primary me-2">
+                                <i class="fas fa-arrow-left me-1"></i> Go Back
+                            </button>
+                            <a href="/listings" class="btn btn-outline-primary">
+                                <i class="fas fa-home me-1"></i> Go to Listings
+                            </a>
+                        </div>
+                    <% } else if (error.statusCode === 401) { %>
+                        <p class="text-muted mb-4">
+                            You need to be logged in to access this page. 
+                            Please sign in or create an account.
+                        </p>
+                        <div class="mb-4">
+                            <a href="/users/login" class="btn btn-primary me-2">
+                                <i class="fas fa-sign-in-alt me-1"></i> Login
+                            </a>
+                            <a href="/users/signup" class="btn btn-outline-primary me-2">
+                                <i class="fas fa-user-plus me-1"></i> Sign Up
+                            </a>
+                            <a href="/listings" class="btn btn-outline-secondary">
+                                <i class="fas fa-home me-1"></i> Browse Listings
+                            </a>
+                        </div>
+                    <% } else if (error.statusCode === 403) { %>
+                        <p class="text-muted mb-4">
+                            You don't have permission to access this resource. 
+                            Please contact the administrator if you believe this is an error.
+                        </p>
+                        <div class="mb-4">
+                            <a href="/listings" class="btn btn-primary me-2">
+                                <i class="fas fa-home me-1"></i> Go to Listings
+                            </a>
+                            <button onclick="history.back()" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-1"></i> Go Back
+                            </button>
+                        </div>
+                    <% } else if (error.statusCode === 500) { %>
+                        <p class="text-muted mb-4">
+                            Something went wrong on our end. 
+                            We're working to fix this issue. Please try again later.
+                        </p>
+                        <div class="mb-4">
+                            <a href="/listings" class="btn btn-primary me-2">
+                                <i class="fas fa-home me-1"></i> Go to Listings
+                            </a>
+                            <button onclick="location.reload()" class="btn btn-outline-primary">
+                                <i class="fas fa-redo me-1"></i> Try Again
+                            </button>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted mb-4">
+                            An unexpected error occurred. 
+                            Please try again later or contact support if the problem persists.
+                        </p>
+                        <div class="mb-4">
+                            <a href="/listings" class="btn btn-primary me-2">
+                                <i class="fas fa-home me-1"></i> Go to Listings
+                            </a>
+                            <button onclick="history.back()" class="btn btn-outline-primary me-2">
+                                <i class="fas fa-arrow-left me-1"></i> Go Back
+                            </button>
+                            <button onclick="location.reload()" class="btn btn-outline-secondary">
+                                <i class="fas fa-redo me-1"></i> Refresh
+                            </button>
+                        </div>
+                    <% } %>
+
+                    <% if (process.env.NODE_ENV === 'development' && error.stack) { %>
+                        <div class="mt-4">
+                            <details class="text-start">
+                                <summary class="text-muted cursor-pointer">
+                                    <i class="fas fa-code me-1"></i> Show Error Details (Development)
+                                </summary>
+                                <pre class="bg-light p-3 mt-2 rounded text-danger" style="font-size: 0.8rem; overflow-x: auto;"><%= error.stack %></pre>
+                            </details>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.error-icon {
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+</style>
+

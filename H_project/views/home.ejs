@@ -1,0 +1,948 @@
+<% layout('layouts/boilerplate') %>
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="hero-content">
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            <span class="gradient-text">PlanMyStay</span>
+                            <br>Your Gateway to Amazing Places
+                        </h1>
+                        <p class="hero-subtitle">
+                            Discover unique accommodations, exciting activities, and unforgettable experiences. 
+                            From cozy beachfront cottages to luxury mountain retreats, find your perfect getaway.
+                        </p>
+                        <div class="hero-buttons">
+                            <% if(!currentUser){ %>
+                                <button onclick="scrollToSection('features')" class="btn btn-primary btn-lg me-3 hero-btn">
+                                    <i class="fas fa-rocket me-2"></i>Get Started
+                                </button>
+                                <button onclick="window.location.href='/users/login'" class="btn btn-outline-light btn-lg hero-btn">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                                </button>
+                            <% } else { %>
+                                <button onclick="window.location.href='/listings'" class="btn btn-primary btn-lg me-3 hero-btn">
+                                    <i class="fas fa-search me-2"></i>Explore Listings
+                                </button>
+                                <button onclick="window.location.href='/listings/new'" class="btn btn-outline-light btn-lg hero-btn">
+                                    <i class="fas fa-plus me-2"></i>Add Listing
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-image">
+                        <div class="floating-cards">
+                            <div class="card-float card-1">
+                                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=300&h=200&fit=crop" alt="Luxury Hotel">
+                                <div class="card-overlay">
+                                    <h6>Luxury Hotels</h6>
+                                    <p>Premium accommodations</p>
+                                </div>
+                            </div>
+                            <div class="card-float card-2">
+                                <img src="https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=300&h=200&fit=crop" alt="Beach House">
+                                <div class="card-overlay">
+                                    <h6>Beach Houses</h6>
+                                    <p>Oceanfront properties</p>
+                                </div>
+                            </div>
+                            <div class="card-float card-3">
+                                <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=300&h=200&fit=crop" alt="Mountain Retreat">
+                                <div class="card-overlay">
+                                    <h6>Mountain Retreats</h6>
+                                    <p>Peaceful getaways</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features-section py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="section-title">Why Choose PlanMyStay?</h2>
+                <p class="section-subtitle">Experience the best in travel and accommodation</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card" onclick="window.location.href='/journey'">
+                    <div class="feature-icon">
+                        <i class="fas fa-search-location"></i>
+                    </div>
+                    <h4>Smart Search</h4>
+                    <p>Find the perfect place with our AI-powered search that understands your preferences and suggests the best matches.</p>
+                    <button class="feature-btn">Explore Now</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card" onclick="window.location.href='/services'">
+                    <div class="feature-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h4>Food & Services</h4>
+                    <p>Enjoy comprehensive services including food ordering, training sessions, sports activities, and more.</p>
+                    <button class="feature-btn">View Services</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card" onclick="window.location.href='/listings'">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Secure Booking</h4>
+                    <p>Book with confidence using our secure payment system and verified property listings.</p>
+                    <button class="feature-btn">Book Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Services Preview Section -->
+<div class="services-preview py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="section-title">Amazing Services</h2>
+                <p class="section-subtitle">Discover what makes our properties special</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="service-preview-card" onclick="window.location.href='/services'">
+                    <div class="service-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h5>Food Ordering</h5>
+                    <p>Order delicious veg and non-veg meals directly to your room</p>
+                    <button class="service-btn">Order Now</button>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="service-preview-card" onclick="window.location.href='/services'">
+                    <div class="service-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h5>Yoga Training</h5>
+                    <p>Relax and rejuvenate with professional yoga sessions</p>
+                    <button class="service-btn">Book Session</button>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="service-preview-card" onclick="window.location.href='/services'">
+                    <div class="service-icon">
+                        <i class="fas fa-futbol"></i>
+                    </div>
+                    <h5>Sports Activities</h5>
+                    <p>Enjoy indoor and outdoor sports facilities</p>
+                    <button class="service-btn">Join Now</button>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="service-preview-card" onclick="window.location.href='/services'">
+                    <div class="service-icon">
+                        <i class="fas fa-spa"></i>
+                    </div>
+                    <h5>Massage Therapy</h5>
+                    <p>Unwind with professional massage services</p>
+                    <button class="service-btn">Book Therapy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="cta-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="cta-title">Ready to Start Your Journey?</h2>
+                <p class="cta-subtitle">Join thousands of travelers who have found their perfect getaway with PlanMyStay</p>
+                <% if(!currentUser){ %>
+                    <div class="cta-buttons">
+                        <button onclick="window.location.href='/users/signup'" class="btn btn-primary btn-lg me-3 cta-btn">
+                            <i class="fas fa-rocket me-2"></i>Sign Up Now
+                        </button>
+                        <button onclick="window.location.href='/users/login'" class="btn btn-outline-primary btn-lg cta-btn">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </button>
+                    </div>
+                <% } else { %>
+                    <div class="cta-buttons">
+                        <button onclick="window.location.href='/listings'" class="btn btn-primary btn-lg me-3 cta-btn">
+                            <i class="fas fa-search me-2"></i>Explore Now
+                        </button>
+                        <button onclick="window.location.href='/listings/new'" class="btn btn-outline-primary btn-lg cta-btn">
+                            <i class="fas fa-plus me-2"></i>Add Property
+                        </button>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <h3 class="stat-number">500+</h3>
+                    <p class="stat-label">Properties</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <h3 class="stat-number">10K+</h3>
+                    <p class="stat-label">Happy Guests</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <h3 class="stat-number">50+</h3>
+                    <p class="stat-label">Cities</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <h3 class="stat-number">4.8★</h3>
+                    <p class="stat-label">Average Rating</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Hero Section Styles */
+.hero-section {
+    position: relative;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    overflow: hidden;
+    min-height: 100vh;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.gradient-text {
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+.hero-buttons .btn {
+    padding: 12px 30px;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.hero-btn {
+    background: linear-gradient(135deg, #ff6b6b, #feca57) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hero-btn:hover {
+    background: linear-gradient(135deg, #ff5252, #ffb74d) !important;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
+}
+
+.hero-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.hero-btn:hover::before {
+    left: 100%;
+}
+
+/* Floating Cards */
+.floating-cards {
+    position: relative;
+    height: 500px;
+}
+
+.card-float {
+    position: absolute;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.card-float:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+}
+
+.card-1 {
+    top: 50px;
+    left: 50px;
+    width: 200px;
+    height: 150px;
+    animation: float1 6s ease-in-out infinite;
+}
+
+.card-2 {
+    top: 200px;
+    right: 50px;
+    width: 180px;
+    height: 140px;
+    animation: float2 6s ease-in-out infinite;
+}
+
+.card-3 {
+    bottom: 50px;
+    left: 100px;
+    width: 160px;
+    height: 120px;
+    animation: float3 6s ease-in-out infinite;
+}
+
+.card-float img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    color: white;
+    padding: 15px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.card-float:hover .card-overlay {
+    transform: translateY(0);
+}
+
+/* Animations */
+@keyframes float1 {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(2deg); }
+}
+
+@keyframes float2 {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(-2deg); }
+}
+
+@keyframes float3 {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+/* Hero Shapes */
+.hero-shapes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    animation: float 8s ease-in-out infinite;
+}
+
+.shape-1 {
+    width: 200px;
+    height: 200px;
+    top: 10%;
+    right: 10%;
+    animation-delay: 0s;
+}
+
+.shape-2 {
+    width: 150px;
+    height: 150px;
+    bottom: 20%;
+    left: 5%;
+    animation-delay: 2s;
+}
+
+.shape-3 {
+    width: 100px;
+    height: 100px;
+    top: 60%;
+    right: 20%;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-30px) rotate(180deg); }
+}
+
+/* Features Section */
+.features-section {
+    background: white;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.section-subtitle {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 0;
+}
+
+.feature-card {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    height: 100%;
+    cursor: pointer;
+    background: white;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border-color: #ff6b6b;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(254, 202, 87, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.feature-card:hover::before {
+    opacity: 1;
+}
+
+.feature-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.feature-btn:hover {
+    background: linear-gradient(135deg, #5a6fd8, #6a4190);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+}
+
+.feature-card h4 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.feature-card p {
+    color: #666;
+    line-height: 1.6;
+}
+
+/* Services Preview */
+.services-preview {
+    background: #f8f9fa;
+}
+
+.service-preview-card {
+    text-align: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    height: 100%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.service-preview-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    border-color: #feca57;
+}
+
+.service-preview-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(254, 202, 87, 0.1), rgba(255, 107, 107, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.service-preview-card:hover::before {
+    opacity: 1;
+}
+
+.service-btn {
+    background: linear-gradient(135deg, #ff6b6b, #feca57);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    font-size: 0.9rem;
+}
+
+.service-btn:hover {
+    background: linear-gradient(135deg, #ff5252, #ffb74d);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 107, 107, 0.3);
+}
+
+.service-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem;
+    background: linear-gradient(135deg, #ff6b6b, #feca57);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.service-preview-card h5 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.service-preview-card p {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* CTA Section */
+.cta-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.cta-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.cta-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.cta-buttons .btn {
+    padding: 12px 30px;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+}
+
+.cta-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.cta-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-btn:hover {
+    background: linear-gradient(135deg, #5a6fd8, #6a4190) !important;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+}
+
+.cta-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.cta-btn:hover::before {
+    left: 100%;
+}
+
+/* Stats Section */
+.stats-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-item {
+    padding: 1rem;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .floating-cards {
+        height: 300px;
+        margin-top: 2rem;
+    }
+    
+    .card-1, .card-2, .card-3 {
+        width: 120px;
+        height: 90px;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .cta-title {
+        font-size: 2rem;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-buttons .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .cta-buttons .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+}
+</style>
+
+<script>
+// Add some interactive animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scroll function
+    window.scrollToSection = function(sectionId) {
+        const element = document.querySelector('.' + sectionId + '-section');
+        if (element) {
+            element.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    };
+
+    // Animate stats on scroll
+    const observerOptions = {
+        threshold: 0.5,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const statNumbers = entry.target.querySelectorAll('.stat-number');
+                statNumbers.forEach(stat => {
+                    const finalNumber = stat.textContent;
+                    const isPercentage = finalNumber.includes('%');
+                    const isStar = finalNumber.includes('★');
+                    const numericValue = parseFloat(finalNumber.replace(/[^\d.]/g, ''));
+                    
+                    let current = 0;
+                    const increment = numericValue / 50;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= numericValue) {
+                            stat.textContent = finalNumber;
+                            clearInterval(timer);
+                        } else {
+                            if (isPercentage) {
+                                stat.textContent = Math.floor(current) + '%';
+                            } else if (isStar) {
+                                stat.textContent = Math.floor(current * 10) / 10 + '★';
+                            } else {
+                                stat.textContent = Math.floor(current) + (finalNumber.includes('K') ? 'K+' : '+');
+                            }
+                        }
+                    }, 30);
+                });
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    const statsSection = document.querySelector('.stats-section');
+    if (statsSection) {
+        observer.observe(statsSection);
+    }
+
+    // Add click effects to all interactive elements
+    const interactiveElements = document.querySelectorAll('.feature-card, .service-preview-card, .hero-btn, .cta-btn, .feature-btn, .service-btn');
+    
+    interactiveElements.forEach(element => {
+        element.addEventListener('click', function(e) {
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // Add floating animation to cards
+    const floatingCards = document.querySelectorAll('.card-float');
+    floatingCards.forEach((card, index) => {
+        card.addEventListener('mouseenter', function() {
+            this.style.animationPlayState = 'paused';
+            this.style.transform = 'translateY(-15px) scale(1.05)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.animationPlayState = 'running';
+            this.style.transform = '';
+        });
+    });
+
+    // Add typing effect to hero title
+    const heroTitle = document.querySelector('.hero-title');
+    if (heroTitle) {
+        const text = heroTitle.innerHTML;
+        heroTitle.innerHTML = '';
+        let i = 0;
+        const typeWriter = () => {
+            if (i < text.length) {
+                heroTitle.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50);
+            }
+        };
+        setTimeout(typeWriter, 1000);
+    }
+});
+
+// Add ripple effect CSS
+const style = document.createElement('style');
+style.textContent = `
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.6);
+        transform: scale(0);
+        animation: ripple-animation 0.6s linear;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+    
+    .feature-card, .service-preview-card {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Dark mode specific styles for home page */
+    [data-theme="dark"] .hero-section {
+        background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+    }
+    
+    [data-theme="dark"] .hero-title {
+        color: white !important;
+    }
+    
+    [data-theme="dark"] .hero-subtitle {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+    
+    [data-theme="dark"] .cta-section {
+        background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+    }
+    
+    [data-theme="dark"] .cta-title {
+        color: white !important;
+    }
+    
+    [data-theme="dark"] .cta-subtitle {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+    
+    [data-theme="dark"] .stats-section {
+        background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+    }
+    
+    [data-theme="dark"] .stat-number {
+        color: white !important;
+    }
+    
+    [data-theme="dark"] .stat-label {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+    
+    [data-theme="dark"] .card-float {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-theme="dark"] .card-float:hover {
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+    
+    [data-theme="dark"] .card-overlay {
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+    }
+`;
+document.head.appendChild(style);
+</script>

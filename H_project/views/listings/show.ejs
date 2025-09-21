@@ -1,0 +1,3337 @@
+<!-- filepath: c:\Users\Abhishek\Desktop\H_project\views\listings\show.ejs -->
+
+<% layout("/layouts/boilerplate.ejs")%>
+
+<script>
+   window.MAP_TOKEN = "<%= process.env.MAP_TOKEN %>";
+   window.LISTING_COORDS = <%- JSON.stringify(typeof mapCoords !== 'undefined' ? mapCoords : null) %>;
+   window.LISTING_TITLE = "<%= listing.title %>";
+</script>
+
+<div class="row">
+    <div class="col-8 offset-2">
+        <h3><%= listing.title %></h3> 
+        <br>
+
+        <div class="card">
+            <img src="<%= listing.image && listing.image.url %>" class="card-img-top show-img" alt="<%= listing.title %>">
+            <div class="card-body">
+                <!-- <h5 class="card-title"></h5> -->
+                <p class="card-text">
+                    <% if (listing.propertyType === 'Hotel') { %>
+                        <span class="badge bg-primary"><%= listing.propertyType %></span>
+                    <% } else if (listing.propertyType === 'PG') { %>
+                        <span class="badge bg-success"><%= listing.propertyType %></span>
+                    <% } else if (listing.propertyType === 'Land for Sale') { %>
+                        <span class="badge bg-warning"><%= listing.propertyType %></span>
+                    <% } else if (listing.propertyType === 'Room Rental') { %>
+                        <span class="badge bg-info"><%= listing.propertyType %></span>
+                    <% } else if (listing.propertyType === 'Apartment') { %>
+                        <span class="badge bg-secondary"><%= listing.propertyType %></span>
+                    <% } else if (listing.propertyType === 'Business Rental') { %>
+                        <span class="badge bg-danger"><%= listing.propertyType %></span>
+                    <% } else { %>
+                        <span class="badge bg-primary"><%= listing.propertyType %></span>
+                    <% } %>
+                </p>
+                <p class="card-text"><%= listing.description %></p>
+                <p class="card-text">
+                    <strong>&#8377 <%= listing.price.toLocaleString("en-IN") %> <span class="per-night-text" data-translate="per_night"><%= listing.pricingPeriod || 'per night' %></span></strong>
+                    <% if (listing.aiPrice) { %>
+                        <br><small class="text-muted"><span data-translate="ai_suggested">AI Suggested</span>: &#8377 <%= listing.aiPrice.toLocaleString("en-IN") %> 
+                        (<%= listing.aiConfidence %>% <span data-translate="confidence">confidence</span>)</small>
+                    <% } %>
+                </p>
+                <p class="card-text"><strong><span class="location-label" data-translate="location">Location</span>:</strong> <%= listing.location %></p>
+                <p class="card-text"><strong><span class="phone-label" data-translate="phone">Phone</span>:</strong> <%= listing.phone || '<span data-translate="not_provided">Not provided</span>' %></p>
+                <p class="card-text"><strong><span class="country-label" data-translate="country">Country</span>:</strong> <%= listing.country %></p>
+            </div>
+        </div>
+
+        <!-- Enhanced Booking Widget -->
+        <div class="mt-4">
+            <div class="card shadow-sm booking-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-baseline gap-2 mb-3">
+                        <% const nightlyPrice = listing.price || 0; %>
+                        <h4 class="mb-0"><strong>&#8377 <%= nightlyPrice.toLocaleString('en-IN') %></strong></h4>
+                        <small class="text-muted per-night-text" data-translate="per_night">per night</small>
+                        <div class="ms-auto">
+                            <button class="btn btn-sm btn-outline-primary convert-currency-btn" onclick="toggleCurrency()">
+                                <i class="fas fa-exchange-alt me-1"></i><span data-translate="convert_currency">Convert Currency</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Currency Converter -->
+                    <div id="currencyConverter" class="alert alert-info" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label small from-label" data-translate="from">From</label>
+                                <select id="fromCurrency" class="form-select form-select-sm">
+                                    <option value="INR">₹ INR (Indian Rupee)</option>
+                                    <option value="USD">$ USD (US Dollar)</option>
+                                    <option value="EUR">€ EUR (Euro)</option>
+                                    <option value="GBP">£ GBP (British Pound)</option>
+                                    <option value="JPY">¥ JPY (Japanese Yen)</option>
+                                    <option value="AUD">A$ AUD (Australian Dollar)</option>
+                                    <option value="CAD">C$ CAD (Canadian Dollar)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small to-label" data-translate="to">To</label>
+                                <select id="toCurrency" class="form-select form-select-sm">
+                                    <option value="USD">$ USD (US Dollar)</option>
+                                    <option value="EUR">€ EUR (Euro)</option>
+                                    <option value="GBP">£ GBP (British Pound)</option>
+                                    <option value="JPY">¥ JPY (Japanese Yen)</option>
+                                    <option value="AUD">A$ AUD (Australian Dollar)</option>
+                                    <option value="CAD">C$ CAD (Canadian Dollar)</option>
+                                    <option value="INR">₹ INR (Indian Rupee)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small converted-price-label" data-translate="converted_price">Converted Price</label>
+                                <div id="convertedPrice" class="form-control form-control-sm bg-light">
+                                    <i class="fas fa-spinner fa-spin"></i> <span data-translate="converting">Converting...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-0 border rounded overflow-hidden mb-3">
+                        <div class="col-6 p-2 border-end">
+                            <label class="text-uppercase small fw-semibold mb-1">Check-in</label>
+                            <input id="bk-checkin" type="date" class="form-control form-control-sm" required />
+                            <div class="invalid-feedback">Please select a valid check-in date.</div>
+                        </div>
+                        <div class="col-6 p-2">
+                            <label class="text-uppercase small fw-semibold mb-1">Checkout</label>
+                            <input id="bk-checkout" type="date" class="form-control form-control-sm" required />
+                            <div class="invalid-feedback">Checkout must be after check-in.</div>
+                        </div>
+                        <div class="col-12 p-2 border-top">
+                            <label class="text-uppercase small fw-semibold mb-1">Guests</label>
+                            <select id="bk-guests" class="form-select form-select-sm" required>
+                                <option value="1">1 guest</option>
+                                <option value="2">2 guests (Couple)</option>
+                                <option value="3">3 guests (Small Group)</option>
+                                <option value="4">4 guests (Family)</option>
+                                <option value="5">5 guests (Family+)</option>
+                                <option value="6">6 guests (Friends Group)</option>
+                                <option value="8">8 guests (Large Group)</option>
+                                <option value="10">10+ guests (Party)</option>
+                            </select>
+                            <div class="invalid-feedback">Please select number of guests.</div>
+                        </div>
+                    </div>
+
+                    <button id="bk-reserve" class="btn btn-gradient w-100 mb-2">Reserve</button>
+                    <div class="text-center text-muted small">You won't be charged yet</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Booking Confirmation Modal -->
+        <div class="modal fade" id="confirmPayModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-calendar-check me-2"></i>Confirm Your Booking</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6 class="text-primary mb-3"><%= listing.title %></h6>
+                    <div class="booking-details">
+                      <div class="d-flex justify-content-between mb-2">
+                        <span><i class="fas fa-calendar-alt me-2"></i>Check-in:</span>
+                        <span id="cp-checkin">—</span>
+                      </div>
+                      <div class="d-flex justify-content-between mb-2">
+                        <span><i class="fas fa-calendar-alt me-2"></i>Check-out:</span>
+                        <span id="cp-checkout">—</span>
+                      </div>
+                      <div class="d-flex justify-content-between mb-2">
+                        <span><i class="fas fa-users me-2"></i>Guests:</span>
+                        <span id="cp-guests">—</span>
+                      </div>
+                      <div class="d-flex justify-content-between mb-2">
+                        <span><i class="fas fa-moon me-2"></i>Nights:</span>
+                        <span id="cp-nights">—</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card bg-light">
+                      <div class="card-body">
+                        <h6 class="card-title">Booking Summary</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                          <span id="cp-nights-label">0 nights x ₹0</span>
+                          <span id="cp-nights-amount">₹0</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                          <span>Service fee (5%)</span>
+                          <span id="cp-service-fee">₹0</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                          <span>Taxes (12%)</span>
+                          <span id="cp-tax">₹0</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold">
+                          <span>Total Amount:</span>
+                          <span id="cp-total" class="text-success">₹0</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="alert alert-info mt-3 mb-0">
+                  <i class="fas fa-info-circle me-2"></i>
+                  Click "Proceed to Payment" to complete your booking with secure payment processing.
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="cp-confirm">
+                  <i class="fas fa-credit-card me-2"></i>Proceed to Payment
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Insights Panel -->
+        <% if (typeof aiInsights !== 'undefined' || (listing && listing.aiInsights)) { %>
+        <div class="mt-4">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">🤖 AI Price Insights</h5>
+                    <div class="btn-group" role="group" aria-label="Toggle insights">
+                        <button type="button" class="btn btn-sm btn-light insight-toggle" data-insight="demand">Demand</button>
+                        <button type="button" class="btn btn-sm btn-light insight-toggle" data-insight="event">Event</button>
+                        <button type="button" class="btn btn-sm btn-light insight-toggle" data-insight="seasonal">Seasonal</button>
+                        <button type="button" class="btn btn-sm btn-light insight-toggle" data-insight="weather">Weather</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <% const insights = (typeof aiInsights !== 'undefined' ? aiInsights : null) || (listing && listing.aiInsights); %>
+                    <% if (insights) { %>
+                        <div class="row g-3" id="insights-container">
+                            <div class="col-md-6">
+                                <p><strong>Demand Level:</strong> 
+                                    <span class="badge <%= insights.demand_level === 'High' ? 'bg-success' : insights.demand_level === 'Medium' ? 'bg-warning' : 'bg-secondary' %>">
+                                        <%= insights.demand_level %>
+                                    </span>
+                                </p>
+                                <p><strong>Event Impact:</strong> 
+                                    <span class="badge <%= insights.event_impact === 'High' ? 'bg-danger' : 'bg-secondary' %>">
+                                        <%= insights.event_impact %>
+                                    </span>
+                                </p>
+                                <div id="event-details" class="small text-muted"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Seasonal Factor:</strong> 
+                                    <span class="badge <%= insights.seasonal_factor === 'Peak' ? 'bg-warning' : 'bg-info' %>">
+                                        <%= insights.seasonal_factor %>
+                                    </span>
+                                </p>
+                                <p><strong>Weather Impact:</strong> 
+                                    <span class="badge <%= insights.weather_impact === 'Positive' ? 'bg-success' : 'bg-secondary' %>">
+                                        <%= insights.weather_impact %>
+                                    </span>
+                                </p>
+                                <div id="season-details" class="small text-muted"></div>
+                                <div id="weather-details" class="small text-muted"></div>
+                                <div id="weather-photo" class="mt-2"></div>
+                            </div>
+                        </div>
+                        <% if (typeof aiInsights !== 'undefined' && aiInsights && aiInsights.predicted_price) { %>
+                        <div class="alert alert-light mt-3">
+                            <strong>Current AI Prediction:</strong> &#8377 <%= aiInsights.predicted_price.toLocaleString("en-IN") %>
+                            <br><small class="text-muted">Confidence: <%= aiInsights.confidence %>% | Last updated: <%= new Date().toLocaleString() %></small>
+                        </div>
+                        <% } %>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Services Section -->
+        <div class="mt-4">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">Services</div>
+                <div class="card-body">
+                    <% const s = listing.services || {}; %>
+                    
+                    <!-- Food Section with Order Button -->
+                    <% if (s.food && s.food.length) { %>
+                        <div class="service-item mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Food:</strong> <%= s.food.join(', ') %>
+                                </div>
+                                <button class="btn btn-primary btn-sm order-btn" data-bs-toggle="modal" data-bs-target="#foodOrderModal">
+                                    <i class="fas fa-utensils me-1"></i>Order
+                                </button>
+                            </div>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Chef Section -->
+                    <% if (s.chef && s.chef.available) { %>
+                        <div class="service-item mb-3">
+                            <p><strong>Chef Available</strong> <%= s.chef.pricePerMeal ? `(₹${s.chef.pricePerMeal}/meal)` : '' %></p>
+                            <% if (s.chef.cuisines && s.chef.cuisines.length) { %>
+                                <p><small>Cuisines:</small> <%= s.chef.cuisines.join(', ') %></p>
+                            <% } %>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Training Section with Interactive Buttons -->
+                    <% if (s.training) { %>
+                        <div class="service-item mb-3">
+                            <h6 class="mb-2">Training Services</h6>
+                            <div class="training-buttons">
+                                <% if (s.training.yoga?.available) { %>
+                                    <button class="btn btn-training yoga-btn" data-bs-toggle="modal" data-bs-target="#trainingModal" data-training="yoga">
+                                        <i class="fas fa-leaf me-1"></i>Yoga
+                                        <small class="d-block"><%= s.training.yoga.pricePerSession?`₹${s.training.yoga.pricePerSession}/session`:'' %></small>
+                                    </button>
+                                <% } %>
+                                <% if (s.training.karate?.available) { %>
+                                    <button class="btn btn-training karate-btn" data-bs-toggle="modal" data-bs-target="#trainingModal" data-training="karate">
+                                        <i class="fas fa-fist-raised me-1"></i>Karate
+                                        <small class="d-block"><%= s.training.karate.pricePerSession?`₹${s.training.karate.pricePerSession}/session`:'' %></small>
+                                    </button>
+                                <% } %>
+                                <% if (s.training.gym?.available) { %>
+                                    <button class="btn btn-training gym-btn" data-bs-toggle="modal" data-bs-target="#trainingModal" data-training="gym">
+                                        <i class="fas fa-dumbbell me-1"></i>Gym
+                                        <small class="d-block"><%= s.training.gym.dayPassPrice?`₹${s.training.gym.dayPassPrice}/day`:'' %></small>
+                                    </button>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Massage Section -->
+                    <% if (s.massage && (s.massage.types?.length || s.massage.priceList?.length)) { %>
+                        <div class="service-item mb-3">
+                            <p><strong>Massage:</strong> <%= (s.massage.types||[]).join(', ') %></p>
+                            <% if (s.massage.priceList && s.massage.priceList.length) { %>
+                                <ul class="mb-0">
+                                    <% s.massage.priceList.forEach(m => { %>
+                                        <li><%= m.name %> - ₹<%= m.price %></li>
+                                    <% }) %>
+                                </ul>
+                            <% } %>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Event Arrangements -->
+                    <% if (s.events && s.events.supported?.length) { %>
+                        <div class="service-item mb-3">
+                            <p><strong>Event Arrangements:</strong> <%= s.events.supported.join(', ') %></p>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Sports Section with Interactive Button -->
+                    <% if (s.sports && (s.sports.indoor?.length || s.sports.outdoor?.length)) { %>
+                        <div class="service-item mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <% if (s.sports.indoor?.length) { %>
+                                        <p class="mb-1"><strong>Indoor Sports:</strong> <%= s.sports.indoor.join(', ') %></p>
+                                    <% } %>
+                                    <% if (s.sports.outdoor?.length) { %>
+                                        <p class="mb-0"><strong>Outdoor Sports:</strong> <%= s.sports.outdoor.join(', ') %></p>
+                                    <% } %>
+                                </div>
+                                <button class="btn btn-success btn-sm sports-btn" data-bs-toggle="modal" data-bs-target="#sportsModal">
+                                    <i class="fas fa-futbol me-1"></i>Sports
+                                </button>
+                            </div>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Sports Ground -->
+                    <% if (s.sportsGroundForRent?.available) { %>
+                        <div class="alert alert-success mt-2">
+                            Sports Ground Available: <%= s.sportsGroundForRent.groundType || 'Multipurpose' %> 
+                            <% if (s.sportsGroundForRent.hourlyRate) { %>
+                                - ₹<%= s.sportsGroundForRent.hourlyRate %>/hour
+                            <% } %>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Food Order Modal with Payment Integration -->
+        <div class="modal fade" id="foodOrderModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-utensils me-2"></i>Food Order</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <!-- Menu Selection -->
+                            <div class="col-md-8">
+                                <div class="text-center mb-4">
+                                    <h6>Choose your preference</h6>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-success" id="vegBtn">
+                                            <i class="fas fa-leaf me-1"></i>Veg
+                                        </button>
+                                        <button type="button" class="btn btn-danger" id="nonVegBtn">
+                                            <i class="fas fa-drumstick-bite me-1"></i>Non-Veg
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Veg Menu -->
+                                <div id="vegMenu" class="menu-section" style="display: none;">
+                                    <h6 class="text-success mb-3"><i class="fas fa-leaf me-1"></i>Vegetarian Menu</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="food-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=300&h=200&fit=crop" class="card-img-top" alt="Dal Makhani">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Dal Makhani</h6>
+                                                    <p class="card-text small">Rich and creamy black lentils cooked with butter and cream</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="price">₹180</span>
+                                                        <button class="btn btn-sm btn-outline-success add-to-cart" data-item="Dal Makhani" data-price="180">
+                                                            <i class="fas fa-plus me-1"></i>Add to Cart
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="food-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=300&h=200&fit=crop" class="card-img-top" alt="Paneer Butter Masala">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Paneer Butter Masala</h6>
+                                                    <p class="card-text small">Soft cottage cheese in rich tomato and butter gravy</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="price">₹220</span>
+                                                        <button class="btn btn-sm btn-outline-success add-to-cart" data-item="Paneer Butter Masala" data-price="220">
+                                                            <i class="fas fa-plus me-1"></i>Add to Cart
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="food-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=300&h=200&fit=crop" class="card-img-top" alt="Chole Bhature">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Chole Bhature</h6>
+                                                    <p class="card-text small">Spicy chickpeas with fluffy fried bread</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="price">₹150</span>
+                                                        <button class="btn btn-sm btn-outline-success add-to-cart" data-item="Chole Bhature" data-price="150">
+                                                            <i class="fas fa-plus me-1"></i>Add to Cart
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="food-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1563379091339-03246963d4d0?w=300&h=200&fit=crop" class="card-img-top" alt="Vegetable Biryani">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Vegetable Biryani</h6>
+                                                    <p class="card-text small">Fragrant basmati rice with mixed vegetables and spices</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="price">₹200</span>
+                                                        <button class="btn btn-sm btn-outline-success add-to-cart" data-item="Vegetable Biryani" data-price="200">
+                                                            <i class="fas fa-plus me-1"></i>Add to Cart
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Non-Veg Menu -->
+                                <div id="nonVegMenu" class="menu-section" style="display: none;">
+                                    <h6 class="text-danger mb-3"><i class="fas fa-drumstick-bite me-1"></i>Non-Vegetarian Menu</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="food-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1562967914-608f82629710?w=300&h=200&fit=crop" class="card-img-top" alt="Chicken Curry">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Chicken Curry</h6>
+                                                    <p class="card-text small">Tender chicken pieces in aromatic curry sauce</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="price">₹250</span>
+                                                        <button class="btn btn-sm btn-outline-danger add-to-cart" data-item="Chicken Curry" data-price="250">
+                                                            <i class="fas fa-plus me-1"></i>Add to Cart
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="food-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=300&h=200&fit=crop" class="card-img-top" alt="Mutton Biryani">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Mutton Biryani</h6>
+                                                    <p class="card-text small">Fragrant rice with tender mutton pieces</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="price">₹350</span>
+                                                        <button class="btn btn-sm btn-outline-danger add-to-cart" data-item="Mutton Biryani" data-price="350">
+                                                            <i class="fas fa-plus me-1"></i>Add to Cart
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="food-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=300&h=200&fit=crop" class="card-img-top" alt="Fish Curry">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Fish Curry</h6>
+                                                    <p class="card-text small">Fresh fish in coconut and tamarind curry</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="price">₹280</span>
+                                                        <button class="btn btn-sm btn-outline-danger add-to-cart" data-item="Fish Curry" data-price="280">
+                                                            <i class="fas fa-plus me-1"></i>Add to Cart
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="food-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1563379091339-03246963d4d0?w=300&h=200&fit=crop" class="card-img-top" alt="Chicken Biryani">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Chicken Biryani</h6>
+                                                    <p class="card-text small">Aromatic basmati rice with chicken and spices</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="price">₹300</span>
+                                                        <button class="btn btn-sm btn-outline-danger add-to-cart" data-item="Chicken Biryani" data-price="300">
+                                                            <i class="fas fa-plus me-1"></i>Add to Cart
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Cart & Checkout -->
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Your Order</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="cartItems">
+                                            <p class="text-muted text-center">Your cart is empty</p>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Total:</strong>
+                                            <strong id="cartTotal">₹0</strong>
+                                        </div>
+                                        <button class="btn btn-success w-100 mt-3" id="proceedToPayment" disabled>
+                                            <i class="fas fa-credit-card me-2"></i>Proceed to Payment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="viewCartBtn" disabled>
+                            <i class="fas fa-shopping-cart me-2"></i>View Cart (<span id="cartCount">0</span>)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Training Details Modal -->
+        <div class="modal fade" id="trainingModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-dumbbell me-2"></i>Training Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <!-- Training Options -->
+                            <div class="col-md-8">
+                                <div class="text-center mb-4">
+                                    <h6>Choose Training Type</h6>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-success" id="yogaBtn">
+                                            <i class="fas fa-leaf me-1"></i>Yoga
+                                        </button>
+                                        <button type="button" class="btn btn-danger" id="karateBtn">
+                                            <i class="fas fa-fist-raised me-1"></i>Karate
+                                        </button>
+                                        <button type="button" class="btn btn-primary" id="gymBtn">
+                                            <i class="fas fa-dumbbell me-1"></i>Gym
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Yoga Training -->
+                                <div id="yogaTraining" class="training-section" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop" class="img-fluid rounded" alt="Yoga Training">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Yoga Training</h6>
+                                            <p class="text-primary mb-2">
+                                                <% const yogaPrice = (listing.services?.training?.yoga?.pricePerSession ?? listing.services?.training?.yoga?.monthlyPrice) || 0; %>
+                                                <%= yogaPrice ? `₹${yogaPrice}/session` : '' %>
+                                            </p>
+                                            <p class="small"><%= listing.services?.training?.yoga?.description || 'Experience the ancient practice of yoga with our certified instructors. Perfect for beginners and advanced practitioners.' %></p>
+                                            
+                                            <h6 class="mt-3">Benefits:</h6>
+                                            <ul class="small">
+                                                <% const yogaBenefits = listing.services?.training?.yoga?.benefits || [
+                                                    'Improves flexibility and strength',
+                                                    'Reduces stress and anxiety',
+                                                    'Enhances mental clarity',
+                                                    'Promotes better sleep',
+                                                    'Boosts immune system'
+                                                ]; %>
+                                                <% yogaBenefits.forEach(b => { %>
+                                                    <li><i class="fas fa-check text-success me-1"></i><%= b %></li>
+                                                <% }) %>
+                                            </ul>
+                                            
+                                            <h6 class="mt-3">Schedule:</h6>
+                                            <p class="small"><%= listing.services?.training?.yoga?.schedule || 'Monday - Friday: 6:00 AM - 8:00 AM, 6:00 PM - 8:00 PM' %></p>
+                                            
+                                            <button class="btn btn-success mt-3 book-session" data-training="Yoga Training" data-price="<%= yogaPrice || 0 %>">
+                                                <i class="fas fa-calendar-plus me-2"></i>Book Session
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Karate Training -->
+                                <div id="karateTraining" class="training-section" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <img src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=300&fit=crop" class="img-fluid rounded" alt="Karate Training">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Karate Training</h6>
+                                            <p class="text-danger mb-2">
+                                                <% const karatePrice = (listing.services?.training?.karate?.pricePerSession ?? listing.services?.training?.karate?.monthlyPrice) || 0; %>
+                                                <%= karatePrice ? `₹${karatePrice}/session` : '' %>
+                                            </p>
+                                            <p class="small"><%= listing.services?.training?.karate?.description || 'Learn the art of self-defense and discipline with our experienced karate instructors. Suitable for all ages.' %></p>
+                                            
+                                            <h6 class="mt-3">Benefits:</h6>
+                                            <ul class="small">
+                                                <% const karateBenefits = listing.services?.training?.karate?.benefits || [
+                                                    'Builds self-confidence',
+                                                    'Improves physical fitness',
+                                                    'Teaches self-defense',
+                                                    'Develops discipline',
+                                                    'Enhances focus'
+                                                ]; %>
+                                                <% karateBenefits.forEach(b => { %>
+                                                    <li><i class="fas fa-check text-success me-1"></i><%= b %></li>
+                                                <% }) %>
+                                            </ul>
+                                            
+                                            <h6 class="mt-3">Schedule:</h6>
+                                            <p class="small"><%= listing.services?.training?.karate?.schedule || 'Monday - Saturday: 5:00 PM - 7:00 PM' %></p>
+                                            
+                                            <button class="btn btn-danger mt-3 book-session" data-training="Karate Training" data-price="<%= karatePrice || 0 %>">
+                                                <i class="fas fa-calendar-plus me-2"></i>Book Session
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Gym Training -->
+                                <div id="gymTraining" class="training-section" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop" class="img-fluid rounded" alt="Gym Training">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Gym Training</h6>
+                                            <p class="text-primary mb-2">
+                                                <% const gymPrice = (listing.services?.training?.gym?.dayPassPrice ?? listing.services?.training?.gym?.monthlyPrice) || 0; %>
+                                                <%= gymPrice ? `₹${gymPrice}${(listing.services?.training?.gym?.dayPassPrice ? '/day' : '/session')}` : '' %>
+                                            </p>
+                                            <p class="small"><%= listing.services?.training?.gym?.description || 'Professional gym training with certified trainers. Personalized workout plans for all fitness levels.' %></p>
+                                            
+                                            <h6 class="mt-3">Benefits:</h6>
+                                            <ul class="small">
+                                                <% const gymBenefits = listing.services?.training?.gym?.benefits || [
+                                                    'Builds muscle strength',
+                                                    'Improves cardiovascular health',
+                                                    'Burns calories effectively',
+                                                    'Increases energy levels',
+                                                    'Boosts metabolism'
+                                                ]; %>
+                                                <% gymBenefits.forEach(b => { %>
+                                                    <li><i class="fas fa-check text-success me-1"></i><%= b %></li>
+                                                <% }) %>
+                                            </ul>
+                                            
+                                            <h6 class="mt-3">Schedule:</h6>
+                                            <p class="small"><%= listing.services?.training?.gym?.schedule || 'Monday - Sunday: 6:00 AM - 10:00 PM' %></p>
+                                            
+                                            <button class="btn btn-primary mt-3 book-session" data-training="Gym Training" data-price="<%= gymPrice || 0 %>">
+                                                <i class="fas fa-calendar-plus me-2"></i>Book Session
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Booking Summary -->
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Training Summary</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="trainingBookingSummary">
+                                            <p class="text-muted text-center">Select a training to book</p>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Total:</strong>
+                                            <strong id="trainingTotal">₹0</strong>
+                                        </div>
+                                        <button class="btn btn-info w-100 mt-3" id="proceedToTrainingPayment" disabled>
+                                            <i class="fas fa-credit-card me-2"></i>Proceed to Payment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="bookTrainingBtn" disabled>
+                            <i class="fas fa-calendar-plus me-2"></i>Book Training
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Sports Modal with Correct Images -->
+        <div class="modal fade" id="sportsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-futbol me-2"></i>Sports Activities</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <!-- Sports Selection -->
+                            <div class="col-md-8">
+                                <div class="text-center mb-4">
+                                    <h6>Choose Sports Category</h6>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-info" id="indoorSportsBtn">
+                                            <i class="fas fa-home me-1"></i>Indoor Sports
+                                        </button>
+                                        <button type="button" class="btn btn-warning" id="outdoorSportsBtn">
+                                            <i class="fas fa-sun me-1"></i>Outdoor Sports
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Indoor Sports -->
+                                <div id="indoorSports" class="sports-section" style="display: none;">
+                                    <h6 class="text-info mb-3"><i class="fas fa-home me-1"></i>Indoor Sports</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="sport-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=300&h=200&fit=crop" class="card-img-top" alt="Carrom">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Carrom</h6>
+                                                    <p class="card-text small"><strong>Rules:</strong> Use striker to pocket coins. White coins worth 20 points, black coins worth 10 points. Queen is worth 50 points.</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge bg-info">Indoor</span>
+                                                        <button class="btn btn-sm btn-outline-info book-sport" data-sport="Carrom" data-price="100">
+                                                            <i class="fas fa-calendar-plus me-1"></i>Book Now
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="sport-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=300&h=200&fit=crop" class="card-img-top" alt="Table Tennis">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Table Tennis</h6>
+                                                    <p class="card-text small"><strong>Rules:</strong> Serve diagonally, ball must bounce once on each side. First to 11 points wins (must win by 2).</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge bg-info">Indoor</span>
+                                                        <button class="btn btn-sm btn-outline-info book-sport" data-sport="Table Tennis" data-price="150">
+                                                            <i class="fas fa-calendar-plus me-1"></i>Book Now
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="sport-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop" class="card-img-top" alt="Chess">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Chess</h6>
+                                                    <p class="card-text small"><strong>Rules:</strong> Strategic board game. Each piece moves differently. Objective is to checkmate the opponent's king.</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge bg-info">Indoor</span>
+                                                        <button class="btn btn-sm btn-outline-info book-sport" data-sport="Chess" data-price="50">
+                                                            <i class="fas fa-calendar-plus me-1"></i>Book Now
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="sport-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop" class="card-img-top" alt="Badminton">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Badminton</h6>
+                                                    <p class="card-text small"><strong>Rules:</strong> Hit shuttlecock over net. First to 21 points wins. Can be played singles or doubles.</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge bg-info">Indoor</span>
+                                                        <button class="btn btn-sm btn-outline-info book-sport" data-sport="Badminton" data-price="120">
+                                                            <i class="fas fa-calendar-plus me-1"></i>Book Now
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Outdoor Sports -->
+                                <div id="outdoorSports" class="sports-section" style="display: none;">
+                                    <h6 class="text-warning mb-3"><i class="fas fa-sun me-1"></i>Outdoor Sports</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="sport-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=300&h=200&fit=crop" class="card-img-top" alt="Cricket">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Cricket</h6>
+                                                    <p class="card-text small"><strong>Rules:</strong> 11 players per team. Score runs by hitting ball and running between wickets. Bowler tries to dismiss batsman.</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge bg-warning">Outdoor</span>
+                                                        <button class="btn btn-sm btn-outline-warning book-sport" data-sport="Cricket" data-price="200">
+                                                            <i class="fas fa-calendar-plus me-1"></i>Book Now
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="sport-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop" class="card-img-top" alt="Football">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Football</h6>
+                                                    <p class="card-text small"><strong>Rules:</strong> 11 players per team. Score by getting ball into opponent's goal. No hands except for goalkeeper.</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge bg-warning">Outdoor</span>
+                                                        <button class="btn btn-sm btn-outline-warning book-sport" data-sport="Football" data-price="180">
+                                                            <i class="fas fa-calendar-plus me-1"></i>Book Now
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="sport-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop" class="card-img-top" alt="Basketball">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Basketball</h6>
+                                                    <p class="card-text small"><strong>Rules:</strong> 5 players per team. Score by shooting ball through opponent's hoop. Dribble to move.</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge bg-warning">Outdoor</span>
+                                                        <button class="btn btn-sm btn-outline-warning book-sport" data-sport="Basketball" data-price="160">
+                                                            <i class="fas fa-calendar-plus me-1"></i>Book Now
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="sport-item card h-100">
+                                                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop" class="card-img-top" alt="Volleyball">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Volleyball</h6>
+                                                    <p class="card-text small"><strong>Rules:</strong> 6 players per team. Hit ball over net without letting it touch ground. Three touches max.</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge bg-warning">Outdoor</span>
+                                                        <button class="btn btn-sm btn-outline-warning book-sport" data-sport="Volleyball" data-price="140">
+                                                            <i class="fas fa-calendar-plus me-1"></i>Book Now
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Booking Summary -->
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Booking Summary</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="sportBookingSummary">
+                                            <p class="text-muted text-center">Select a sport to book</p>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Total:</strong>
+                                            <strong id="sportTotal">₹0</strong>
+                                        </div>
+                                        <button class="btn btn-success w-100 mt-3" id="proceedToSportPayment" disabled>
+                                            <i class="fas fa-credit-card me-2"></i>Proceed to Payment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="bookActivityBtn" disabled>
+                            <i class="fas fa-calendar-plus me-2"></i>Book Activity
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comprehensive Payment Modal -->
+        <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title"><i class="fas fa-credit-card me-2"></i>Secure Payment</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <!-- Order Summary -->
+                            <div class="col-md-5">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0"><i class="fas fa-receipt me-2"></i>Order Summary</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="paymentOrderSummary">
+                                            <!-- Order items will be populated here -->
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Total Amount:</strong>
+                                            <strong id="paymentTotal">₹0</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between text-muted">
+                                            <small>Service Charge:</small>
+                                            <small id="serviceCharge">₹0</small>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Final Amount:</strong>
+                                            <strong id="finalAmount" class="text-success">₹0</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Payment Methods -->
+                            <div class="col-md-7">
+                                <h6 class="mb-3">Choose Payment Method</h6>
+                                
+                                <!-- Online Payment Methods -->
+                                <div class="payment-methods">
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-md-6">
+                                            <div class="payment-option" data-method="upi">
+                                                <div class="card payment-card">
+                                                    <div class="card-body text-center">
+                                                        <i class="fas fa-qrcode fa-2x text-success mb-2"></i>
+                                                        <h6>UPI</h6>
+                                                        <small class="text-muted">Instant Transfer</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="payment-option" data-method="google-pay">
+                                                <div class="card payment-card">
+                                                    <div class="card-body text-center">
+                                                        <i class="fab fa-google-pay fa-2x text-primary mb-2"></i>
+                                                        <h6>Google Pay</h6>
+                                                        <small class="text-muted">Quick & Secure</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="payment-option" data-method="phonepe">
+                                                <div class="card payment-card">
+                                                    <div class="card-body text-center">
+                                                        <i class="fas fa-mobile-alt fa-2x text-info mb-2"></i>
+                                                        <h6>PhonePe</h6>
+                                                        <small class="text-muted">UPI Payment</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="payment-option" data-method="paytm">
+                                                <div class="card payment-card">
+                                                    <div class="card-body text-center">
+                                                        <i class="fas fa-wallet fa-2x text-blue mb-2"></i>
+                                                        <h6>Paytm</h6>
+                                                        <small class="text-muted">Digital Wallet</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="payment-option" data-method="credit-card">
+                                                <div class="card payment-card">
+                                                    <div class="card-body text-center">
+                                                        <i class="fas fa-credit-card fa-2x text-dark mb-2"></i>
+                                                        <h6>Credit/Debit Card</h6>
+                                                        <small class="text-muted">Visa, Mastercard</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="payment-option" data-method="netbanking">
+                                                <div class="card payment-card">
+                                                    <div class="card-body text-center">
+                                                        <i class="fas fa-university fa-2x text-secondary mb-2"></i>
+                                                        <h6>Net Banking</h6>
+                                                        <small class="text-muted">All Major Banks</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Cash on Delivery -->
+                                    <div class="payment-option" data-method="cod">
+                                        <div class="card payment-card">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-money-bill-wave fa-2x text-warning mb-2"></i>
+                                                <h6>Cash on Delivery</h6>
+                                                <small class="text-muted">Pay when you arrive</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Payment Form -->
+                                <div id="paymentForm" style="display: none;">
+                                    <div class="card mt-3">
+                                        <div class="card-body">
+                                            <h6 id="paymentMethodTitle">Payment Details</h6>
+                                            <div id="paymentMethodForm">
+                                                <!-- Payment method specific forms will be loaded here -->
+                                            </div>
+                                            <button class="btn btn-success w-100 mt-3" id="processPayment">
+                                                <i class="fas fa-lock me-2"></i>Pay Securely
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmPayment" disabled>
+                            <i class="fas fa-check me-2"></i>Confirm Payment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="/listings" class="btn btn-secondary">Back to Listings</a>
+            <a href="/listings/<%= listing._id %>/edit" class="btn btn-primary">Edit this listing</a>
+            <button type="button" class="btn btn-danger" id="btn-delete-listing" data-id="<%= listing._id %>">Delete this listing</button>
+        </div>
+        
+        <div class="col-8 offset-3 md-3">
+            <hr>
+            <h4>Leave a Review</h4>
+            <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate class="needs-validation">
+                
+                <div class="mb-3 mt-3">
+                    <label for="rating" class="form-label">Rating</label>
+                    <select name="review[rating]" id="rating" class="form-select" required>
+                        <option value="">Select a rating</option>
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="5">5 - Excellent</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3 mt-3">
+                    <label for="comment" class="form-label">Comment</label>
+                    <textarea name="review[comment]" id="comment" cols="30" rows="5" class="form-control" required minlength="3" maxlength="500" placeholder="Share your experience with this property..."></textarea>
+                    <div class="form-text">
+                        Comment must be between 3 and 500 characters.
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="author" class="form-label">Your Name (Optional)</label>
+                    <input type="text" name="review[author]" id="author" class="form-control" minlength="2" maxlength="50" placeholder="Enter your name or leave blank for anonymous">
+                    <div class="form-text">
+                        Name must be between 2 and 50 characters. Leave blank for anonymous.
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-outline-dark">Submit Review</button>
+            </form>
+            
+            <hr>
+            <% if(listing.reviews && listing.reviews.length > 0) { %>
+                <div class="mb-3">
+                    <strong>Average Rating: </strong>
+                    <span class="badge bg-success">
+                        <%= (listing.reviews.reduce((sum, r) => sum + r.rating, 0) / listing.reviews.length).toFixed(1) %>/5
+                    </span>
+                </div>
+            <% } %>
+
+            <h4>All Reviews (<%= listing.reviews ? listing.reviews.length : 0 %>)</h4>
+            
+            <% if (listing.reviews && listing.reviews.length > 0) { %>
+                <div class="reviews-container">
+                    <% listing.reviews.forEach(function(review) { %>
+                        <div class="card mb-3 review-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="review-content">
+                                        <h6 class="card-subtitle mb-2 text-muted">
+                                            <%= review.author || 'Anonymous User' %>
+                                            <span class="badge bg-warning text-dark ms-2">
+                                                <%= '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating) %> 
+                                                (<%= review.rating %>/5)
+                                            </span>
+                                        </h6>
+                                        <p class="card-text"><%= review.comment %></p>
+                                        <small class="text-muted">
+                                            Posted on <%= new Date(review.createdAt).toLocaleDateString() %>
+                                        </small>
+                                    </div>
+                                    <div class="review-actions">
+                                        <a href="/listings/<%= listing._id %>/reviews/<%= review._id %>/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                                        <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this review?')">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="alert alert-info">
+                    <p class="mb-0">No reviews yet. Be the first to leave a review!</p>
+                </div>
+            <% } %>
+        </div>
+
+
+        <!-- ...existing code... -->
+<% if (typeof predictedPrice !== 'undefined') { %>
+    <div class="alert alert-success">
+        Fair Pricing Insight: AI suggests <%= predictedPrice %> for this property.
+    </div>
+<% } %>
+<!-- ...existing code... -->
+
+<!-- Show AI price if available -->
+<% if (listing.aiPrice) { %>
+    <div class="alert alert-info">
+        AI Predicted Price: <%= listing.aiPrice %>
+    </div>
+<% } %>
+
+
+
+
+    </div>
+</div>
+
+<style>
+.review-card {
+    border-left: 4px solid #007bff;
+    transition: transform 0.2s;
+}
+
+.review-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.review-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.review-content {
+    flex: 1;
+}
+
+.badge.bg-warning {
+    font-size: 0.8em;
+}
+
+.booking-card {
+    border: 1px solid #eee;
+    border-radius: 14px;
+}
+
+.btn-gradient {
+    color: #fff;
+    background: linear-gradient(90deg, #ff375f, #ff006a, #ff2d55);
+    border: none;
+}
+.btn-gradient:hover {
+    filter: brightness(0.95);
+}
+
+/* Services Section Styling */
+.service-item {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+    border-left: 4px solid #007bff;
+    transition: all 0.3s ease;
+}
+
+.service-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.training-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-training {
+    flex: 1;
+    min-width: 120px;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-training:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.yoga-btn {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+}
+
+.yoga-btn:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+    border-color: #4CAF50;
+}
+
+.karate-btn {
+    background: linear-gradient(135deg, #FF5722, #E64A19);
+    color: white;
+}
+
+.karate-btn:hover {
+    background: linear-gradient(135deg, #E64A19, #D84315);
+    border-color: #FF5722;
+}
+
+.gym-btn {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
+}
+
+.gym-btn:hover {
+    background: linear-gradient(135deg, #1976D2, #1565C0);
+    border-color: #2196F3;
+}
+
+.order-btn, .sports-btn {
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.order-btn:hover, .sports-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Modal Styling */
+.modal-content {
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 1rem 1rem 0 0;
+}
+
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+    border-radius: 0 0 1rem 1rem;
+}
+
+.food-item, .sport-item {
+    transition: all 0.3s ease;
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.food-item:hover, .sport-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.food-item .card-img-top, .sport-item .card-img-top {
+    height: 150px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.food-item:hover .card-img-top, .sport-item:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+.price {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #28a745;
+}
+
+.menu-section, .sports-section {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-group .btn.active {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .training-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-training {
+        min-width: 100%;
+    }
+    
+    .food-item, .sport-item {
+        margin-bottom: 1rem;
+    }
+    
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .service-item {
+        padding: 0.75rem;
+    }
+    
+    .btn-training {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .order-btn, .sports-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Unique Features Styling */
+.attraction-item {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.attraction-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background-color: #f8f9fa;
+}
+
+.booking-error {
+    animation: slideInDown 0.5s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.currency-converter {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.language-widget .btn {
+    transition: all 0.3s ease;
+}
+
+.language-widget .btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.weather-widget {
+    background: linear-gradient(135deg, #87ceeb, #98d8e8);
+}
+
+.attractions-widget {
+    background: linear-gradient(135deg, #90ee90, #98fb98);
+}
+
+/* Dark mode support for new features */
+[data-theme="dark"] .attraction-item {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .attraction-item:hover {
+    background-color: var(--bg-secondary);
+}
+
+[data-theme="dark"] .currency-converter {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .weather-widget {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+}
+
+[data-theme="dark"] .attractions-widget {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+/* Payment System Styling */
+.payment-option {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.payment-option:hover .payment-card {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.payment-option.selected .payment-card {
+    border: 2px solid #28a745;
+    background-color: #f8f9fa;
+}
+
+.payment-card {
+    transition: all 0.3s ease;
+    border: 1px solid #dee2e6;
+}
+
+.payment-card:hover {
+    border-color: #28a745;
+}
+
+.food-item, .sport-item {
+    transition: all 0.3s ease;
+}
+
+.food-item:hover, .sport-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.add-to-cart, .book-sport, .book-session {
+    transition: all 0.3s ease;
+}
+
+.add-to-cart:hover, .book-sport:hover, .book-session:hover {
+    transform: scale(1.05);
+}
+
+/* Dark mode support for payment system */
+[data-theme="dark"] .payment-card {
+    background-color: var(--bg-secondary);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .payment-option.selected .payment-card {
+    background-color: var(--bg-tertiary);
+    border-color: #28a745;
+}
+
+[data-theme="dark"] .food-item, [data-theme="dark"] .sport-item {
+    background-color: var(--bg-secondary);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+</style>
+
+<script>
+// Client-side validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const comment = document.getElementById('comment').value.trim();
+    const rating = document.getElementById('rating').value;
+    const author = document.getElementById('author').value.trim();
+    
+    if (comment.length < 3) {
+        e.preventDefault();
+        alert('Comment must be at least 3 characters long.');
+        return;
+    }
+    
+    if (comment.length > 500) {
+        e.preventDefault();
+        alert('Comment cannot exceed 500 characters.');
+        return;
+    }
+    
+    if (!rating) {
+        e.preventDefault();
+        alert('Please select a rating.');
+        return;
+    }
+    
+    if (author && author.length < 2) {
+        e.preventDefault();
+        alert('Author name must be at least 2 characters long.');
+        return;
+    }
+    
+    if (author && author.length > 50) {
+        e.preventDefault();
+        alert('Author name cannot exceed 50 characters.');
+        return;
+    }
+});
+</script>
+
+<script>
+// Enhanced Booking widget logic
+(() => {
+  const pricePerNight = <%- JSON.stringify(listing.price || 0) %>;
+  const checkinEl = document.getElementById('bk-checkin');
+  const checkoutEl = document.getElementById('bk-checkout');
+  const guestsEl = document.getElementById('bk-guests');
+  const reserveBtn = document.getElementById('bk-reserve');
+
+  if (!checkinEl || !checkoutEl || !reserveBtn) return;
+
+  const todayISO = new Date().toISOString().split('T')[0];
+  checkinEl.min = todayISO;
+  checkoutEl.min = todayISO;
+
+  // Enhanced error display function
+  function showBookingError(message, field = null) {
+    // Remove existing error if any
+    const existingError = document.querySelector('.booking-error');
+    if (existingError) {
+      existingError.remove();
+    }
+    
+    // Clear field validation
+    if (field) {
+      field.classList.remove('is-valid', 'is-invalid');
+      field.classList.add('is-invalid');
+    }
+    
+    // Create error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'booking-error alert alert-warning alert-dismissible fade show mt-2';
+    errorDiv.innerHTML = `
+      <i class="fas fa-exclamation-triangle me-2"></i>${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Insert after booking card
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+      bookingCard.parentNode.insertBefore(errorDiv, bookingCard.nextSibling);
+      
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        if (errorDiv.parentNode) {
+          errorDiv.remove();
+        }
+      }, 5000);
+    }
+  }
+
+  function showBookingSuccess(message) {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+    successDiv.innerHTML = `
+      <i class="fas fa-check-circle me-2"></i>${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+      bookingCard.parentNode.insertBefore(successDiv, bookingCard.nextSibling);
+    }
+  }
+
+  function calcNights(ci, co) {
+    const a = new Date(ci);
+    const b = new Date(co);
+    const ms = b - a;
+    return ms > 0 ? Math.ceil(ms / (1000*60*60*24)) : 0;
+  }
+
+  function validateBookingForm() {
+    let isValid = true;
+    
+    // Clear previous validation
+    [checkinEl, checkoutEl, guestsEl].forEach(el => {
+      el.classList.remove('is-valid', 'is-invalid');
+    });
+
+    // Validate check-in
+    if (!checkinEl.value) {
+      showBookingError('Please select a check-in date.', checkinEl);
+      isValid = false;
+    } else {
+      checkinEl.classList.add('is-valid');
+    }
+
+    // Validate check-out
+    if (!checkoutEl.value) {
+      showBookingError('Please select a check-out date.', checkoutEl);
+      isValid = false;
+    } else if (checkinEl.value && checkoutEl.value) {
+      const nights = calcNights(checkinEl.value, checkoutEl.value);
+      if (nights <= 0) {
+        showBookingError('Check-out must be after check-in date.', checkoutEl);
+        isValid = false;
+      } else {
+        checkoutEl.classList.add('is-valid');
+      }
+    }
+
+    // Validate guests
+    if (!guestsEl.value) {
+      showBookingError('Please select number of guests.', guestsEl);
+      isValid = false;
+    } else {
+      guestsEl.classList.add('is-valid');
+    }
+
+    return isValid;
+  }
+
+  function openBookingModal() {
+    if (!validateBookingForm()) {
+      return;
+    }
+
+    const ci = checkinEl.value;
+    const co = checkoutEl.value;
+    const g = Number(guestsEl.value || 1);
+    const nights = calcNights(ci, co);
+    
+    const subtotal = nights * pricePerNight;
+    const serviceFee = Math.round(subtotal * 0.05);
+    const tax = Math.round(subtotal * 0.12);
+    const total = subtotal + serviceFee + tax;
+
+    // Update modal content
+    document.getElementById('cp-checkin').textContent = new Date(ci).toLocaleDateString('en-IN');
+    document.getElementById('cp-checkout').textContent = new Date(co).toLocaleDateString('en-IN');
+    document.getElementById('cp-guests').textContent = `${g} guest${g>1?'s':''}`;
+    document.getElementById('cp-nights').textContent = `${nights} night${nights>1?'s':''}`;
+    document.getElementById('cp-nights-label').textContent = `${nights} night${nights>1?'s':''} x ₹${pricePerNight.toLocaleString('en-IN')}`;
+    document.getElementById('cp-nights-amount').textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+    document.getElementById('cp-service-fee').textContent = `₹${serviceFee.toLocaleString('en-IN')}`;
+    document.getElementById('cp-tax').textContent = `₹${tax.toLocaleString('en-IN')}`;
+    document.getElementById('cp-total').textContent = `₹${total.toLocaleString('en-IN')}`;
+
+    const modal = new bootstrap.Modal(document.getElementById('confirmPayModal'));
+    modal.show();
+  }
+
+  // Enhanced event listeners
+  checkinEl.addEventListener('change', () => {
+    if (checkinEl.value) {
+      checkoutEl.min = checkinEl.value;
+      if (checkoutEl.value && calcNights(checkinEl.value, checkoutEl.value) <= 0) {
+        checkoutEl.value = '';
+        showBookingError('Check-out must be after check-in date.', checkoutEl);
+      }
+    }
+  });
+
+  checkoutEl.addEventListener('change', () => {
+    if (checkinEl.value && checkoutEl.value) {
+      const nights = calcNights(checkinEl.value, checkoutEl.value);
+      if (nights <= 0) {
+        showBookingError('Check-out must be after check-in date.', checkoutEl);
+        checkoutEl.value = '';
+      }
+    }
+  });
+
+  reserveBtn.addEventListener('click', openBookingModal);
+
+  // Enhanced confirm button handler
+  const cpBtn = document.getElementById('cp-confirm');
+  if (cpBtn) {
+    cpBtn.addEventListener('click', () => {
+      // Close booking modal and open payment modal
+      const bookingModal = bootstrap.Modal.getInstance(document.getElementById('confirmPayModal'));
+      bookingModal.hide();
+      
+      // Open payment modal with booking data
+      setTimeout(() => {
+        openPaymentModal('booking', [{
+          name: '<%= listing.title %>',
+          price: pricePerNight * calcNights(checkinEl.value, checkoutEl.value)
+        }], pricePerNight * calcNights(checkinEl.value, checkoutEl.value));
+      }, 300);
+    });
+  }
+})();
+</script>
+
+<div class="col-8 offset-2 mb-3">
+    <h3>Where you'll be</h3>
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <button id="btn-current-location" class="btn btn-sm btn-outline-primary">Use current location</button>
+        <small id="live-coords" class="text-muted"></small>
+    </div>
+    <div id="map" style="width: 100%; height: 400px; border-radius: 8px;"></div>
+</div>
+<script src="/js/map.js"></script>
+
+<!-- Simple Payment Section -->
+<div class="col-8 offset-2 mb-4">
+    <div class="card">
+        <div class="card-header bg-dark text-white">Payment and Contact</div>
+        <div class="card-body">
+            <% if (listing.payment && (listing.payment.upiId || listing.payment.phoneNumber || listing.qrImageUrl)) { %>
+                <p><strong>Owner Contact:</strong> <%= listing.payment.phoneNumber || listing.phone || 'Not provided' %></p>
+                <% if (listing.payment.upiId) { %>
+                    <p><strong>UPI ID:</strong> <code><%= listing.payment.upiId %></code></p>
+                <% } %>
+                <% if (listing.payment.qrImageUrl) { %>
+                    <div class="mb-2">
+                        <strong>Scan to Pay:</strong>
+                        <div><img src="<%= listing.payment.qrImageUrl %>" alt="UPI QR" style="max-width:200px;border:1px solid #eee;border-radius:6px;"/></div>
+                    </div>
+                <% } %>
+                <% if (listing.payment.methods && listing.payment.methods.length) { %>
+                    <p><strong>Accepted Methods:</strong> <%= listing.payment.methods.join(', ') %></p>
+                <% } %>
+            <% } else { %>
+                <p>Contact the owner to arrange payment. Phone: <%= listing.phone || 'Not provided' %></p>
+            <% } %>
+            <div class="mt-3">
+                <label class="form-label">Choose payment date</label>
+                <input type="date" class="form-control" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Insight toggles: highlight selected insight and scroll into view
+document.querySelectorAll('.insight-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const type = btn.getAttribute('data-insight');
+    const container = document.getElementById('insights-container');
+    if (!container) return;
+    container.querySelectorAll('p').forEach(p => p.classList.remove('border','border-2','border-info','rounded'));
+    const map = { demand: 0, event: 1, seasonal: 2, weather: 3 };
+    const index = map[type];
+    const target = container.querySelectorAll('p')[index];
+    if (target) {
+      target.classList.add('border','border-2','border-info','rounded');
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Fetch dynamic insight details
+    const coords = window.LISTING_COORDS;
+    if (type === 'weather' && Array.isArray(coords)) {
+      fetch(`/api/insights/weather?lat=${coords[1]}&lng=${coords[0]}`)
+        .then(r => r.json()).then(d => {
+          const el = document.getElementById('weather-details');
+          if (el && d && d.current) {
+            el.textContent = `Now: ${d.current.temperature}°C, wind ${d.current.windspeed} km/h`;
+          }
+          const wp = document.getElementById('weather-photo');
+          if (wp) {
+            const img = document.createElement('img');
+            img.style.maxWidth = '200px';
+            img.style.borderRadius = '6px';
+            // simple illustrative image based on temperature
+            const t = d?.current?.temperature || 25;
+            const url = t > 30
+              ? 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=800' // sunny
+              : t < 15
+                ? 'https://images.unsplash.com/photo-1482192596544-9eb780fc7f66?q=80&w=800' // cold
+                : 'https://images.unsplash.com/photo-1501973801540-537f08ccae7b?q=80&w=800'; // mild
+            img.src = url;
+            wp.innerHTML = '';
+            wp.appendChild(img);
+          }
+        }).catch(()=>{});
+    }
+    if (type === 'seasonal') {
+      fetch(`/api/insights/seasonal`)
+        .then(r => r.json()).then(d => {
+          const el = document.getElementById('season-details');
+          if (el && d) el.textContent = `${d.season} — ${d.recommendation}`;
+        }).catch(()=>{});
+    }
+    if (type === 'event') {
+      const place = encodeURIComponent(`${window.LISTING_TITLE}`);
+      fetch(`/api/insights/events?place=${place}`)
+        .then(r => r.json()).then(d => {
+          const el = document.getElementById('event-details');
+          if (el && d && d.upcoming) {
+            el.innerHTML = d.upcoming.map(e => `<div class="mt-1">${e.name} — ${e.date}<br><img src="${e.image}" style="max-width:160px;border-radius:6px;"/></div>`).join('');
+          }
+        }).catch(()=>{});
+    }
+  });
+});
+
+// Services Modal Interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Food Order Modal Logic
+    const vegBtn = document.getElementById('vegBtn');
+    const nonVegBtn = document.getElementById('nonVegBtn');
+    const vegMenu = document.getElementById('vegMenu');
+    const nonVegMenu = document.getElementById('nonVegMenu');
+    
+    if (vegBtn && nonVegBtn) {
+        vegBtn.addEventListener('click', function() {
+            vegMenu.style.display = 'block';
+            nonVegMenu.style.display = 'none';
+            vegBtn.classList.add('active');
+            nonVegBtn.classList.remove('active');
+        });
+        
+        nonVegBtn.addEventListener('click', function() {
+            nonVegMenu.style.display = 'block';
+            vegMenu.style.display = 'none';
+            nonVegBtn.classList.add('active');
+            vegBtn.classList.remove('active');
+        });
+    }
+    
+    // Training Modal Logic
+    const trainingButtons = document.querySelectorAll('.btn-training');
+    const trainingModalTitle = document.getElementById('trainingModalTitle');
+    const trainingModalBody = document.getElementById('trainingModalBody');
+    
+    trainingButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const trainingType = this.getAttribute('data-training');
+            updateTrainingModal(trainingType);
+        });
+    });
+    
+    function updateTrainingModal(type) {
+        const trainingData = {
+            yoga: {
+                title: 'Yoga Training',
+                icon: 'fas fa-leaf',
+                image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop',
+                price: '₹500/session',
+                description: 'Experience the ancient practice of yoga with our certified instructors. Perfect for beginners and advanced practitioners.',
+                benefits: [
+                    'Improves flexibility and strength',
+                    'Reduces stress and anxiety',
+                    'Enhances mental clarity',
+                    'Promotes better sleep',
+                    'Boosts immune system'
+                ],
+                schedule: 'Monday - Friday: 6:00 AM - 8:00 AM, 6:00 PM - 8:00 PM'
+            },
+            karate: {
+                title: 'Karate Training',
+                icon: 'fas fa-fist-raised',
+                image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop',
+                price: '₹600/session',
+                description: 'Learn traditional karate techniques with our experienced martial arts instructors. Suitable for all ages and skill levels.',
+                benefits: [
+                    'Builds self-confidence',
+                    'Improves discipline and focus',
+                    'Enhances physical fitness',
+                    'Teaches self-defense',
+                    'Develops mental toughness'
+                ],
+                schedule: 'Tuesday, Thursday, Saturday: 5:00 PM - 7:00 PM'
+            },
+            gym: {
+                title: 'Gym Training',
+                icon: 'fas fa-dumbbell',
+                image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop',
+                price: '₹300/day',
+                description: 'State-of-the-art gym equipment with personal training sessions available. Achieve your fitness goals with professional guidance.',
+                benefits: [
+                    'Modern equipment available',
+                    'Personal training sessions',
+                    'Cardio and strength training',
+                    'Nutritional guidance',
+                    'Flexible timing'
+                ],
+                schedule: 'Daily: 5:00 AM - 10:00 PM'
+            }
+        };
+        
+        const data = trainingData[type];
+        if (data) {
+            trainingModalTitle.innerHTML = `<i class="${data.icon} me-2"></i>${data.title}`;
+            trainingModalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="${data.image}" class="img-fluid rounded mb-3" alt="${data.title}">
+                        <h6 class="text-primary">${data.price}</h6>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-3">${data.description}</p>
+                        <h6>Benefits:</h6>
+                        <ul class="list-unstyled">
+                            ${data.benefits.map(benefit => `<li><i class="fas fa-check text-success me-2"></i>${benefit}</li>`).join('')}
+                        </ul>
+                        <div class="mt-3">
+                            <small class="text-muted"><strong>Schedule:</strong> ${data.schedule}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    // Sports Modal Logic
+    const indoorSportsBtn = document.getElementById('indoorSportsBtn');
+    const outdoorSportsBtn = document.getElementById('outdoorSportsBtn');
+    const indoorSports = document.getElementById('indoorSports');
+    const outdoorSports = document.getElementById('outdoorSports');
+    
+    if (indoorSportsBtn && outdoorSportsBtn) {
+        indoorSportsBtn.addEventListener('click', function() {
+            indoorSports.style.display = 'block';
+            outdoorSports.style.display = 'none';
+            indoorSportsBtn.classList.add('active');
+            outdoorSportsBtn.classList.remove('active');
+        });
+        
+        outdoorSportsBtn.addEventListener('click', function() {
+            outdoorSports.style.display = 'block';
+            indoorSports.style.display = 'none';
+            outdoorSportsBtn.classList.add('active');
+            indoorSportsBtn.classList.remove('active');
+        });
+    }
+});
+
+// Currency Converter Functions
+function toggleCurrency() {
+    const converter = document.getElementById('currencyConverter');
+    if (converter.style.display === 'none') {
+        converter.style.display = 'block';
+        convertCurrency();
+    } else {
+        converter.style.display = 'none';
+    }
+}
+
+async function convertCurrency() {
+    const fromCurrency = document.getElementById('fromCurrency').value;
+    const toCurrency = document.getElementById('toCurrency').value;
+    const originalPrice = <%- JSON.stringify(listing.price || 0) %>;
+    
+    if (fromCurrency === toCurrency) {
+        document.getElementById('convertedPrice').textContent = formatCurrency(originalPrice, fromCurrency);
+        return;
+    }
+    
+    try {
+        const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`);
+        const data = await response.json();
+        
+        if (data.rates && data.rates[toCurrency]) {
+            const rate = data.rates[toCurrency];
+            const convertedAmount = originalPrice * rate;
+            document.getElementById('convertedPrice').textContent = formatCurrency(convertedAmount, toCurrency);
+        } else {
+            document.getElementById('convertedPrice').textContent = 'Conversion unavailable';
+        }
+    } catch (error) {
+        console.error('Currency conversion error:', error);
+        document.getElementById('convertedPrice').textContent = 'Conversion failed';
+    }
+}
+
+function formatCurrency(amount, currency) {
+    const symbols = {
+        'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥',
+        'AUD': 'A$', 'CAD': 'C$', 'INR': '₹'
+    };
+    const symbol = symbols[currency] || currency;
+    return `${symbol}${amount.toFixed(2)}`;
+}
+
+// Initialize unique features and payment system
+document.addEventListener('DOMContentLoaded', function() {
+    const fromCurrency = document.getElementById('fromCurrency');
+    const toCurrency = document.getElementById('toCurrency');
+    
+    if (fromCurrency) fromCurrency.addEventListener('change', convertCurrency);
+    if (toCurrency) toCurrency.addEventListener('change', convertCurrency);
+    
+    addUniqueFeatures();
+    initializePaymentSystem();
+    initializeFoodOrdering();
+    initializeSportsBooking();
+    initializeTrainingBooking();
+});
+
+function addUniqueFeatures() {
+    addWeatherWidget();
+    addLocalAttractions();
+    addInstantBooking();
+    addLanguageSupport();
+}
+
+function addWeatherWidget() {
+    const weatherWidget = document.createElement('div');
+    weatherWidget.className = 'card mt-3';
+    weatherWidget.innerHTML = `
+        <div class="card-header bg-info text-white">
+            <h6 class="mb-0"><i class="fas fa-cloud-sun me-2"></i>Current Weather</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-6 text-center">
+                    <i class="fas fa-sun fa-2x text-warning mb-2"></i>
+                    <h4>25°C</h4>
+                    <small class="text-muted">Sunny</small>
+                </div>
+                <div class="col-6 small">
+                    <div><strong>Humidity:</strong> 65%</div>
+                    <div><strong>Wind:</strong> 12 km/h</div>
+                    <div><strong>UV Index:</strong> 6</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+        bookingCard.parentNode.insertBefore(weatherWidget, bookingCard.nextSibling);
+    }
+}
+
+function addLocalAttractions() {
+    const attractionsWidget = document.createElement('div');
+    attractionsWidget.className = 'card mt-3';
+    attractionsWidget.innerHTML = `
+        <div class="card-header bg-success text-white">
+            <h6 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Nearby Attractions</h6>
+        </div>
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <div class="attraction-item p-2 border rounded">
+                        <i class="fas fa-mountain text-primary me-2"></i>
+                        <strong>Mountain View</strong>
+                        <small class="d-block text-muted">2.5 km away</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="attraction-item p-2 border rounded">
+                        <i class="fas fa-utensils text-success me-2"></i>
+                        <strong>Local Restaurant</strong>
+                        <small class="d-block text-muted">0.8 km away</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="attraction-item p-2 border rounded">
+                        <i class="fas fa-shopping-cart text-warning me-2"></i>
+                        <strong>Shopping Mall</strong>
+                        <small class="d-block text-muted">1.2 km away</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="attraction-item p-2 border rounded">
+                        <i class="fas fa-bus text-info me-2"></i>
+                        <strong>Bus Station</strong>
+                        <small class="d-block text-muted">0.5 km away</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+        bookingCard.parentNode.insertBefore(attractionsWidget, bookingCard.nextSibling);
+    }
+}
+
+function addInstantBooking() {
+    const reserveBtn = document.getElementById('bk-reserve');
+    if (reserveBtn) {
+        reserveBtn.addEventListener('click', function() {
+            // Validate booking form before proceeding
+            if (validateBookingForm()) {
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-check me-2"></i>Booked Successfully!';
+                    this.classList.remove('btn-gradient');
+                    this.classList.add('btn-success');
+                    showBookingSuccess();
+                }, 2000);
+            }
+        });
+    }
+}
+
+function validateBookingForm() {
+    const checkinEl = document.getElementById('bk-checkin');
+    const checkoutEl = document.getElementById('bk-checkout');
+    const guestsEl = document.getElementById('bk-guests');
+    
+    // Check if all required fields are filled
+    if (!checkinEl.value) {
+        showBookingError('Please select a check-in date.');
+        checkinEl.focus();
+        return false;
+    }
+    
+    if (!checkoutEl.value) {
+        showBookingError('Please select a check-out date.');
+        checkoutEl.focus();
+        return false;
+    }
+    
+    if (!guestsEl.value) {
+        showBookingError('Please select number of guests.');
+        guestsEl.focus();
+        return false;
+    }
+    
+    // Validate dates
+    const checkinDate = new Date(checkinEl.value);
+    const checkoutDate = new Date(checkoutEl.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (checkinDate < today) {
+        showBookingError('Check-in date cannot be in the past.');
+        checkinEl.focus();
+        return false;
+    }
+    
+    if (checkoutDate <= checkinDate) {
+        showBookingError('Check-out date must be after check-in date.');
+        checkoutEl.focus();
+        return false;
+    }
+    
+    // Calculate nights
+    const nights = Math.ceil((checkoutDate - checkinDate) / (1000 * 60 * 60 * 24));
+    if (nights < 1) {
+        showBookingError('Minimum stay is 1 night.');
+        return false;
+    }
+    
+    // Show booking summary before confirming
+    showBookingSummary(checkinEl.value, checkoutEl.value, guestsEl.value, nights);
+    return true;
+}
+
+function showBookingSummary(checkin, checkout, guests, nights) {
+    const pricePerNight = <%- JSON.stringify(listing.price || 0) %>;
+    const totalPrice = pricePerNight * nights;
+    
+    const summaryDiv = document.createElement('div');
+    summaryDiv.className = 'alert alert-info alert-dismissible fade show mt-2';
+    summaryDiv.innerHTML = `
+        <h6><i class="fas fa-calendar-check me-2"></i>Booking Summary</h6>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Check-in:</strong> ${new Date(checkin).toLocaleDateString()}</p>
+                <p><strong>Check-out:</strong> ${new Date(checkout).toLocaleDateString()}</p>
+                <p><strong>Guests:</strong> ${guests}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Nights:</strong> ${nights}</p>
+                <p><strong>Price per night:</strong> ₹${pricePerNight.toLocaleString('en-IN')}</p>
+                <p><strong>Total Price:</strong> ₹${totalPrice.toLocaleString('en-IN')}</p>
+            </div>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-success btn-sm" onclick="confirmBooking('${checkin}', '${checkout}', '${guests}', ${nights}, ${totalPrice})">
+                <i class="fas fa-credit-card me-1"></i>Proceed to Payment
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="this.closest('.alert').remove()">
+                <i class="fas fa-times me-1"></i>Cancel
+            </button>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+        bookingCard.parentNode.insertBefore(summaryDiv, bookingCard.nextSibling);
+    }
+}
+
+function confirmBooking(checkin, checkout, guests, nights, totalPrice) {
+    // Remove booking summary
+    const summaryDiv = document.querySelector('.alert-info');
+    if (summaryDiv) summaryDiv.remove();
+    
+    // Show payment options
+    showPaymentOptions(checkin, checkout, guests, nights, totalPrice);
+}
+
+function showPaymentOptions(checkin, checkout, guests, nights, totalPrice) {
+    const paymentDiv = document.createElement('div');
+    paymentDiv.className = 'alert alert-warning alert-dismissible fade show mt-2';
+    paymentDiv.innerHTML = `
+        <h6><i class="fas fa-credit-card me-2"></i>Payment Options</h6>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Total Amount:</strong> ₹${totalPrice.toLocaleString('en-IN')}</p>
+                <p><strong>Booking Details:</strong></p>
+                <ul class="small">
+                    <li>Check-in: ${new Date(checkin).toLocaleDateString()}</li>
+                    <li>Check-out: ${new Date(checkout).toLocaleDateString()}</li>
+                    <li>Guests: ${guests}</li>
+                    <li>Nights: ${nights}</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label class="form-label">Payment Method</label>
+                    <select class="form-select" id="paymentMethod">
+                        <option value="upi">UPI</option>
+                        <option value="card">Credit/Debit Card</option>
+                        <option value="netbanking">Net Banking</option>
+                        <option value="wallet">Digital Wallet</option>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">Contact Number</label>
+                    <input type="tel" class="form-control" id="contactNumber" placeholder="Enter your phone number" required>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-success btn-sm" onclick="processPayment('${checkin}', '${checkout}', '${guests}', ${nights}, ${totalPrice})">
+                <i class="fas fa-lock me-1"></i>Pay Now
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="this.closest('.alert').remove()">
+                <i class="fas fa-times me-1"></i>Cancel
+            </button>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+        bookingCard.parentNode.insertBefore(paymentDiv, bookingCard.nextSibling);
+    }
+}
+
+function processPayment(checkin, checkout, guests, nights, totalPrice) {
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    const contactNumber = document.getElementById('contactNumber').value;
+    
+    if (!contactNumber) {
+        showBookingError('Please enter your contact number.');
+        document.getElementById('contactNumber').focus();
+        return;
+    }
+    
+    // Remove payment options
+    const paymentDiv = document.querySelector('.alert-warning');
+    if (paymentDiv) paymentDiv.remove();
+    
+    // Show processing
+    const processingDiv = document.createElement('div');
+    processingDiv.className = 'alert alert-info alert-dismissible fade show mt-2';
+    processingDiv.innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin me-2"></i>
+            <strong>Processing Payment...</strong>
+            <p class="mb-0">Please wait while we process your booking.</p>
+        </div>
+    `;
+    
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+        bookingCard.parentNode.insertBefore(processingDiv, bookingCard.nextSibling);
+    }
+    
+    // Simulate payment processing
+    setTimeout(() => {
+        processingDiv.remove();
+        showFinalBookingSuccess(checkin, checkout, guests, nights, totalPrice, paymentMethod, contactNumber);
+    }, 3000);
+}
+
+function showFinalBookingSuccess(checkin, checkout, guests, nights, totalPrice, paymentMethod, contactNumber) {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+    successDiv.innerHTML = `
+        <h6><i class="fas fa-check-circle me-2"></i>Booking Confirmed!</h6>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Booking ID:</strong> #${Date.now()}</p>
+                <p><strong>Check-in:</strong> ${new Date(checkin).toLocaleDateString()}</p>
+                <p><strong>Check-out:</strong> ${new Date(checkout).toLocaleDateString()}</p>
+                <p><strong>Guests:</strong> ${guests}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Total Amount:</strong> ₹${totalPrice.toLocaleString('en-IN')}</p>
+                <p><strong>Payment Method:</strong> ${paymentMethod.toUpperCase()}</p>
+                <p><strong>Contact:</strong> ${contactNumber}</p>
+                <p><strong>Status:</strong> <span class="badge bg-success">Confirmed</span></p>
+            </div>
+        </div>
+        <div class="mt-3">
+            <p class="mb-2"><i class="fas fa-envelope me-1"></i>Confirmation email sent to your registered email</p>
+            <p class="mb-0"><i class="fas fa-sms me-1"></i>SMS confirmation sent to ${contactNumber}</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+        bookingCard.parentNode.insertBefore(successDiv, bookingCard.nextSibling);
+    }
+    
+    // Reset the reserve button
+    const reserveBtn = document.getElementById('bk-reserve');
+    if (reserveBtn) {
+        reserveBtn.innerHTML = 'Reserve';
+        reserveBtn.disabled = false;
+        reserveBtn.classList.remove('btn-success');
+        reserveBtn.classList.add('btn-gradient');
+    }
+}
+
+function showBookingSuccess() {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+    successDiv.innerHTML = `
+        <i class="fas fa-check-circle me-2"></i>
+        <strong>Booking Confirmed!</strong> You will receive a confirmation email shortly.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+        bookingCard.parentNode.insertBefore(successDiv, bookingCard.nextSibling);
+    }
+}
+
+function addLanguageSupport() {
+    const languageWidget = document.createElement('div');
+    languageWidget.className = 'card mt-3';
+    languageWidget.innerHTML = `
+        <div class="card-header bg-warning text-dark">
+            <h6 class="mb-0 language-support-title"><i class="fas fa-globe me-2"></i>Language Support</h6>
+        </div>
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <button class="btn btn-outline-primary btn-sm w-100" onclick="changeLanguage('en')">
+                        <i class="fas fa-flag-usa me-1"></i>English
+                    </button>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-success btn-sm w-100" onclick="changeLanguage('hi')">
+                        <i class="fas fa-flag me-1"></i>हिन्दी
+                    </button>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-info btn-sm w-100" onclick="changeLanguage('es')">
+                        <i class="fas fa-flag me-1"></i>Español
+                    </button>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-warning btn-sm w-100" onclick="changeLanguage('fr')">
+                        <i class="fas fa-flag me-1"></i>Français
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+        bookingCard.parentNode.insertBefore(languageWidget, bookingCard.nextSibling);
+    }
+}
+
+function changeLanguage(lang) {
+    const translations = {
+        'en': {
+            'reserve': 'Reserve',
+            'guests': 'Guests',
+            'per_night': 'per night',
+            'location': 'Location',
+            'phone': 'Phone',
+            'country': 'Country',
+            'convert_currency': 'Convert Currency',
+            'from': 'From',
+            'to': 'To',
+            'converted_price': 'Converted Price',
+            'converting': 'Converting...',
+            'not_provided': 'Not provided',
+            'ai_suggested': 'AI Suggested',
+            'confidence': 'confidence',
+            'book_now': 'Book Now',
+            'check_availability': 'Check Availability',
+            'amenities': 'Amenities',
+            'services': 'Services',
+            'reviews': 'Reviews',
+            'write_review': 'Write a Review',
+            'submit_review': 'Submit Review',
+            'rating': 'Rating',
+            'comment': 'Comment',
+            'food_services': 'Food Services',
+            'training_services': 'Training Services',
+            'massage_services': 'Massage Services',
+            'sports_services': 'Sports Services',
+            'event_services': 'Event Services',
+            'language_support': 'Language Support',
+            'language_changed': 'Language changed to',
+            'full_translation_available': 'Full translation is now available!'
+        },
+        'hi': {
+            'reserve': 'आरक्षित करें',
+            'guests': 'अतिथि',
+            'per_night': 'प्रति रात',
+            'location': 'स्थान',
+            'phone': 'फोन',
+            'country': 'देश',
+            'convert_currency': 'मुद्रा परिवर्तन',
+            'from': 'से',
+            'to': 'तक',
+            'converted_price': 'परिवर्तित मूल्य',
+            'converting': 'परिवर्तित हो रहा है...',
+            'not_provided': 'प्रदान नहीं किया गया',
+            'ai_suggested': 'AI सुझाव',
+            'confidence': 'विश्वास',
+            'book_now': 'अभी बुक करें',
+            'check_availability': 'उपलब्धता जांचें',
+            'amenities': 'सुविधाएं',
+            'services': 'सेवाएं',
+            'reviews': 'समीक्षाएं',
+            'write_review': 'समीक्षा लिखें',
+            'submit_review': 'समीक्षा सबमिट करें',
+            'rating': 'रेटिंग',
+            'comment': 'टिप्पणी',
+            'food_services': 'भोजन सेवाएं',
+            'training_services': 'प्रशिक्षण सेवाएं',
+            'massage_services': 'मालिश सेवाएं',
+            'sports_services': 'खेल सेवाएं',
+            'event_services': 'इवेंट सेवाएं',
+            'language_support': 'भाषा समर्थन',
+            'language_changed': 'भाषा बदली गई',
+            'full_translation_available': 'पूर्ण अनुवाद अब उपलब्ध है!'
+        },
+        'es': {
+            'reserve': 'Reservar',
+            'guests': 'Huéspedes',
+            'per_night': 'por noche',
+            'location': 'Ubicación',
+            'phone': 'Teléfono',
+            'country': 'País',
+            'convert_currency': 'Convertir Moneda',
+            'from': 'Desde',
+            'to': 'Hasta',
+            'converted_price': 'Precio Convertido',
+            'converting': 'Convirtiendo...',
+            'not_provided': 'No proporcionado',
+            'ai_suggested': 'Sugerido por IA',
+            'confidence': 'confianza',
+            'book_now': 'Reservar Ahora',
+            'check_availability': 'Verificar Disponibilidad',
+            'amenities': 'Comodidades',
+            'services': 'Servicios',
+            'reviews': 'Reseñas',
+            'write_review': 'Escribir Reseña',
+            'submit_review': 'Enviar Reseña',
+            'rating': 'Calificación',
+            'comment': 'Comentario',
+            'food_services': 'Servicios de Comida',
+            'training_services': 'Servicios de Entrenamiento',
+            'massage_services': 'Servicios de Masaje',
+            'sports_services': 'Servicios Deportivos',
+            'event_services': 'Servicios de Eventos',
+            'language_support': 'Soporte de Idioma',
+            'language_changed': 'Idioma cambiado a',
+            'full_translation_available': '¡Traducción completa ahora disponible!'
+        },
+        'fr': {
+            'reserve': 'Réserver',
+            'guests': 'Invités',
+            'per_night': 'par nuit',
+            'location': 'Emplacement',
+            'phone': 'Téléphone',
+            'country': 'Pays',
+            'convert_currency': 'Convertir Devise',
+            'from': 'De',
+            'to': 'À',
+            'converted_price': 'Prix Converti',
+            'converting': 'Conversion...',
+            'not_provided': 'Non fourni',
+            'ai_suggested': 'Suggéré par IA',
+            'confidence': 'confiance',
+            'book_now': 'Réserver Maintenant',
+            'check_availability': 'Vérifier Disponibilité',
+            'amenities': 'Équipements',
+            'services': 'Services',
+            'reviews': 'Avis',
+            'write_review': 'Écrire un Avis',
+            'submit_review': 'Soumettre Avis',
+            'rating': 'Note',
+            'comment': 'Commentaire',
+            'food_services': 'Services Alimentaires',
+            'training_services': 'Services d\'Entraînement',
+            'massage_services': 'Services de Massage',
+            'sports_services': 'Services Sportifs',
+            'event_services': 'Services d\'Événements',
+            'language_support': 'Support Linguistique',
+            'language_changed': 'Langue changée en',
+            'full_translation_available': 'Traduction complète maintenant disponible!'
+        }
+    };
+    
+    const t = translations[lang] || translations['en'];
+    
+    // Translate all elements with data-translate attribute
+    document.querySelectorAll('[data-translate]').forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (t[key]) {
+            element.textContent = t[key];
+        }
+    });
+    
+    // Translate specific elements by ID or class
+    const elementsToTranslate = [
+        { selector: '#bk-reserve', key: 'reserve' },
+        { selector: '.per-night-text', key: 'per_night' },
+        { selector: '.location-label', key: 'location' },
+        { selector: '.phone-label', key: 'phone' },
+        { selector: '.country-label', key: 'country' },
+        { selector: '.convert-currency-btn', key: 'convert_currency' },
+        { selector: '.from-label', key: 'from' },
+        { selector: '.to-label', key: 'to' },
+        { selector: '.converted-price-label', key: 'converted_price' },
+        { selector: '.book-now-btn', key: 'book_now' },
+        { selector: '.check-availability-btn', key: 'check_availability' },
+        { selector: '.amenities-title', key: 'amenities' },
+        { selector: '.services-title', key: 'services' },
+        { selector: '.reviews-title', key: 'reviews' },
+        { selector: '.write-review-btn', key: 'write_review' },
+        { selector: '.submit-review-btn', key: 'submit_review' },
+        { selector: '.rating-label', key: 'rating' },
+        { selector: '.comment-label', key: 'comment' }
+    ];
+    
+    elementsToTranslate.forEach(({ selector, key }) => {
+        const element = document.querySelector(selector);
+        if (element && t[key]) {
+            element.textContent = t[key];
+        }
+    });
+    
+    // Update language support title
+    const languageSupportTitle = document.querySelector('.language-support-title');
+    if (languageSupportTitle) {
+        languageSupportTitle.textContent = t.language_support;
+    }
+    
+    // Show success notification
+    const notification = document.createElement('div');
+    notification.className = 'alert alert-success alert-dismissible fade show mt-2';
+    notification.innerHTML = `
+        <i class="fas fa-language me-2"></i>
+        ${t.language_changed} ${lang.toUpperCase()}. ${t.full_translation_available}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+        bookingCard.parentNode.insertBefore(notification, bookingCard.nextSibling);
+    }
+    
+    // Store current language
+    localStorage.setItem('selectedLanguage', lang);
+}
+
+// Load saved language on page load
+function loadSavedLanguage() {
+    const savedLanguage = localStorage.getItem('selectedLanguage');
+    if (savedLanguage) {
+        changeLanguage(savedLanguage);
+    }
+}
+
+// Initialize language support when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    addLanguageSupport();
+    loadSavedLanguage();
+});
+
+// Payment System Functions
+let currentOrder = {
+    items: [],
+    total: 0,
+    type: 'food' // 'food', 'sport', 'training'
+};
+
+function initializePaymentSystem() {
+    // Payment method selection
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            const method = this.dataset.method;
+            showPaymentForm(method);
+            document.getElementById('confirmPayment').disabled = false;
+        });
+    });
+    
+    // Process payment
+    document.getElementById('processPayment').addEventListener('click', processPayment);
+    document.getElementById('confirmPayment').addEventListener('click', confirmPayment);
+    
+    // Payment method selection
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', function() {
+            // Remove selected class from all options
+            document.querySelectorAll('.payment-option').forEach(opt => {
+                opt.classList.remove('selected');
+                opt.querySelector('.payment-card').classList.remove('border-primary', 'bg-light');
+            });
+            
+            // Add selected class to clicked option
+            this.classList.add('selected');
+            this.querySelector('.payment-card').classList.add('border-primary', 'bg-light');
+            
+            // Show payment form
+            const paymentForm = document.getElementById('paymentForm');
+            const paymentMethodTitle = document.getElementById('paymentMethodTitle');
+            const paymentMethodForm = document.getElementById('paymentMethodForm');
+            
+            if (paymentForm) {
+                paymentForm.style.display = 'block';
+                
+                const method = this.dataset.method;
+                const methodNames = {
+                    'upi': 'UPI Payment',
+                    'google-pay': 'Google Pay',
+                    'phonepe': 'PhonePe',
+                    'paytm': 'Paytm Wallet',
+                    'credit-card': 'Credit/Debit Card',
+                    'netbanking': 'Net Banking',
+                    'cod': 'Cash on Delivery'
+                };
+                
+                paymentMethodTitle.textContent = methodNames[method] || method;
+                
+                // Generate appropriate form based on payment method
+                paymentMethodForm.innerHTML = generatePaymentForm(method);
+            }
+        });
+    });
+}
+
+function generatePaymentForm(method) {
+    switch(method) {
+        case 'upi':
+            return `
+                <div class="mb-3">
+                    <label class="form-label">UPI ID</label>
+                    <input type="text" class="form-control" placeholder="yourname@paytm" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mobile Number</label>
+                    <input type="tel" class="form-control" placeholder="+91 9876543210" required>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    You will be redirected to your UPI app to complete the payment.
+                </div>
+            `;
+        case 'google-pay':
+            return `
+                <div class="mb-3">
+                    <label class="form-label">Google Pay Number</label>
+                    <input type="tel" class="form-control" placeholder="+91 9876543210" required>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fab fa-google-pay me-2"></i>
+                    You will be redirected to Google Pay to complete the payment.
+                </div>
+            `;
+        case 'phonepe':
+            return `
+                <div class="mb-3">
+                    <label class="form-label">PhonePe Number</label>
+                    <input type="tel" class="form-control" placeholder="+91 9876543210" required>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-mobile-alt me-2"></i>
+                    You will be redirected to PhonePe to complete the payment.
+                </div>
+            `;
+        case 'paytm':
+            return `
+                <div class="mb-3">
+                    <label class="form-label">Paytm Number</label>
+                    <input type="tel" class="form-control" placeholder="+91 9876543210" required>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-wallet me-2"></i>
+                    You will be redirected to Paytm to complete the payment.
+                </div>
+            `;
+        case 'credit-card':
+            return `
+                <div class="mb-3">
+                    <label class="form-label">Card Number</label>
+                    <input type="text" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Expiry Date</label>
+                            <input type="text" class="form-control" placeholder="MM/YY" maxlength="5" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">CVV</label>
+                            <input type="text" class="form-control" placeholder="123" maxlength="3" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Cardholder Name</label>
+                    <input type="text" class="form-control" placeholder="John Doe" required>
+                </div>
+            `;
+        case 'netbanking':
+            return `
+                <div class="mb-3">
+                    <label class="form-label">Select Bank</label>
+                    <select class="form-select" required>
+                        <option value="">Choose your bank</option>
+                        <option value="sbi">State Bank of India</option>
+                        <option value="hdfc">HDFC Bank</option>
+                        <option value="icici">ICICI Bank</option>
+                        <option value="axis">Axis Bank</option>
+                        <option value="kotak">Kotak Mahindra Bank</option>
+                        <option value="pnb">Punjab National Bank</option>
+                    </select>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-university me-2"></i>
+                    You will be redirected to your bank's secure payment page.
+                </div>
+            `;
+        case 'cod':
+            return `
+                <div class="alert alert-warning">
+                    <i class="fas fa-money-bill-wave me-2"></i>
+                    <strong>Cash on Delivery</strong><br>
+                    Pay the full amount when you arrive at the property. No advance payment required.
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contact Number</label>
+                    <input type="tel" class="form-control" placeholder="+91 9876543210" required>
+                </div>
+            `;
+        default:
+            return '<div class="alert alert-info">Please select a payment method.</div>';
+    }
+}
+
+function showPaymentForm(method) {
+    const formContainer = document.getElementById('paymentMethodForm');
+    const formTitle = document.getElementById('paymentMethodTitle');
+    const paymentForm = document.getElementById('paymentForm');
+    
+    paymentForm.style.display = 'block';
+    
+    switch(method) {
+        case 'google-pay':
+            formTitle.textContent = 'Google Pay Payment';
+            formContainer.innerHTML = `
+                <div class="text-center">
+                    <i class="fab fa-google-pay fa-3x text-primary mb-3"></i>
+                    <p>Click below to open Google Pay</p>
+                    <button class="btn btn-primary" onclick="openGooglePay()">
+                        <i class="fab fa-google-pay me-2"></i>Open Google Pay
+                    </button>
+                </div>
+            `;
+            break;
+        case 'phonepe':
+            formTitle.textContent = 'PhonePe Payment';
+            formContainer.innerHTML = `
+                <div class="mb-3">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" placeholder="Enter your PhonePe number" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">UPI PIN</label>
+                    <input type="password" class="form-control" placeholder="Enter UPI PIN" maxlength="6" required>
+                </div>
+            `;
+            break;
+        case 'paytm':
+            formTitle.textContent = 'Paytm Payment';
+            formContainer.innerHTML = `
+                <div class="mb-3">
+                    <label class="form-label">Paytm Wallet</label>
+                    <input type="text" class="form-control" placeholder="Enter Paytm number" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">OTP</label>
+                    <input type="text" class="form-control" placeholder="Enter OTP" maxlength="6" required>
+                </div>
+            `;
+            break;
+        case 'upi':
+            formTitle.textContent = 'UPI Payment';
+            formContainer.innerHTML = `
+                <div class="text-center">
+                    <div class="qr-code mb-3">
+                        <i class="fas fa-qrcode fa-4x text-success"></i>
+                        <p class="mt-2">Scan QR Code with your UPI app</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">UPI ID</label>
+                        <input type="text" class="form-control" placeholder="yourname@paytm" required>
+                    </div>
+                </div>
+            `;
+            break;
+        case 'cod':
+            formTitle.textContent = 'Cash on Delivery';
+            formContainer.innerHTML = `
+                <div class="text-center">
+                    <i class="fas fa-money-bill-wave fa-3x text-warning mb-3"></i>
+                    <p>Pay when you receive your order</p>
+                    <div class="alert alert-info">
+                        <small>Extra ₹50 delivery charge applies for COD</small>
+                    </div>
+                </div>
+            `;
+            break;
+    }
+}
+
+function processPayment() {
+    const button = document.getElementById('processPayment');
+    const selectedMethod = document.querySelector('.payment-option.selected')?.dataset.method;
+    
+    if (!selectedMethod) {
+        alert('Please select a payment method first.');
+        return;
+    }
+    
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing Payment...';
+    button.disabled = true;
+    
+    // Simulate real-time payment processing based on method
+    const processingTime = selectedMethod === 'cod' ? 1000 : 3000;
+    
+    setTimeout(() => {
+        // Simulate payment success
+        button.innerHTML = '<i class="fas fa-check me-2"></i>Payment Successful!';
+        button.classList.remove('btn-success');
+        button.classList.add('btn-success');
+        
+        // Show payment success and process booking
+        showPaymentSuccess(selectedMethod);
+        
+        // Process booking confirmation
+        setTimeout(() => {
+            processBookingConfirmation();
+        }, 1500);
+        
+    }, processingTime);
+}
+
+function confirmPayment() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
+    modal.hide();
+    
+    // Show order confirmation
+    showOrderConfirmation();
+}
+
+function showPaymentSuccess(paymentMethod) {
+    const methodNames = {
+        'upi': 'UPI',
+        'google-pay': 'Google Pay',
+        'phonepe': 'PhonePe',
+        'paytm': 'Paytm',
+        'credit-card': 'Credit/Debit Card',
+        'netbanking': 'Net Banking',
+        'cod': 'Cash on Delivery'
+    };
+    
+    const successDiv = document.createElement('div');
+    successDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+    successDiv.innerHTML = `
+        <i class="fas fa-check-circle me-2"></i>
+        <strong>Payment Successful!</strong> Payment of ₹${window.currentBooking?.finalAmount?.toLocaleString('en-IN') || '0'} via ${methodNames[paymentMethod] || paymentMethod} has been processed successfully.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+        bookingCard.parentNode.insertBefore(successDiv, bookingCard.nextSibling);
+    }
+}
+
+function processBookingConfirmation() {
+    // Close payment modal
+    const paymentModal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
+    if (paymentModal) {
+        paymentModal.hide();
+    }
+    
+    // Generate booking reference
+    const bookingRef = 'BK' + Date.now().toString().slice(-8);
+    
+    // Store booking in localStorage (simulating database storage)
+    const bookingData = {
+        id: bookingRef,
+        listingId: '<%= listing._id %>',
+        listingTitle: '<%= listing.title %>',
+        checkin: document.getElementById('bk-checkin')?.value,
+        checkout: document.getElementById('bk-checkout')?.value,
+        guests: document.getElementById('bk-guests')?.value,
+        totalAmount: window.currentBooking?.finalAmount || 0,
+        paymentMethod: document.querySelector('.payment-option.selected')?.dataset.method,
+        status: 'confirmed',
+        timestamp: new Date().toISOString()
+    };
+    
+    // Store in localStorage
+    const existingBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+    existingBookings.push(bookingData);
+    localStorage.setItem('userBookings', JSON.stringify(existingBookings));
+    
+    // Show booking confirmation
+    showOrderConfirmation(bookingRef, bookingData);
+}
+
+function showOrderConfirmation(bookingRef, bookingData) {
+    const confirmationDiv = document.createElement('div');
+    confirmationDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+    confirmationDiv.innerHTML = `
+        <div class="d-flex align-items-start">
+            <i class="fas fa-check-circle fa-2x me-3 text-success"></i>
+            <div class="flex-grow-1">
+                <h5 class="alert-heading mb-2">Booking Confirmed!</h5>
+                <p class="mb-2"><strong>Booking Reference:</strong> ${bookingRef}</p>
+                <p class="mb-2"><strong>Property:</strong> ${bookingData.listingTitle}</p>
+                <p class="mb-2"><strong>Check-in:</strong> ${new Date(bookingData.checkin).toLocaleDateString('en-IN')}</p>
+                <p class="mb-2"><strong>Check-out:</strong> ${new Date(bookingData.checkout).toLocaleDateString('en-IN')}</p>
+                <p class="mb-2"><strong>Guests:</strong> ${bookingData.guests}</p>
+                <p class="mb-2"><strong>Total Amount:</strong> ₹${bookingData.totalAmount.toLocaleString('en-IN')}</p>
+                <p class="mb-0"><strong>Status:</strong> <span class="badge bg-success">Confirmed</span></p>
+                <hr>
+                <p class="mb-0"><small>You will receive a confirmation email and SMS shortly. Please keep your booking reference for future reference.</small></p>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const bookingCard = document.querySelector('.booking-card');
+    if (bookingCard) {
+        bookingCard.parentNode.insertBefore(confirmationDiv, bookingCard.nextSibling);
+    }
+    
+    // Reset booking form
+    setTimeout(() => {
+        document.getElementById('bk-checkin').value = '';
+        document.getElementById('bk-checkout').value = '';
+        document.getElementById('bk-guests').value = '1';
+        [document.getElementById('bk-checkin'), document.getElementById('bk-checkout'), document.getElementById('bk-guests')].forEach(el => {
+            el.classList.remove('is-valid', 'is-invalid');
+        });
+    }, 2000);
+}
+
+function openPaymentModal(orderType, items, total) {
+    currentOrder = {
+        items: items,
+        total: total,
+        type: orderType
+    };
+    
+    updatePaymentSummary();
+    const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    paymentModal.show();
+}
+
+function updatePaymentSummary() {
+    const summaryContainer = document.getElementById('paymentOrderSummary');
+    const totalElement = document.getElementById('paymentTotal');
+    const serviceChargeElement = document.getElementById('serviceCharge');
+    const finalAmountElement = document.getElementById('finalAmount');
+    
+    let summaryHTML = '';
+    currentOrder.items.forEach(item => {
+        summaryHTML += `
+            <div class="d-flex justify-content-between mb-2">
+                <span>${item.name}</span>
+                <span>₹${item.price.toLocaleString('en-IN')}</span>
+            </div>
+        `;
+    });
+    
+    summaryContainer.innerHTML = summaryHTML;
+    
+    const serviceCharge = Math.round(currentOrder.total * 0.05); // 5% service charge
+    const finalAmount = currentOrder.total + serviceCharge;
+    
+    totalElement.textContent = `₹${currentOrder.total.toLocaleString('en-IN')}`;
+    serviceChargeElement.textContent = `₹${serviceCharge.toLocaleString('en-IN')}`;
+    finalAmountElement.textContent = `₹${finalAmount.toLocaleString('en-IN')}`;
+    
+    // Store booking data for payment processing
+    window.currentBooking = {
+        orderType: currentOrder.type,
+        items: currentOrder.items,
+        total: currentOrder.total,
+        serviceCharge,
+        finalAmount,
+        timestamp: new Date().toISOString()
+    };
+}
+
+// Food Ordering System
+function initializeFoodOrdering() {
+    let cart = [];
+    
+    // Veg/Non-Veg toggle
+    document.getElementById('vegBtn').addEventListener('click', function() {
+        document.getElementById('vegMenu').style.display = 'block';
+        document.getElementById('nonVegMenu').style.display = 'none';
+        this.classList.add('active');
+        document.getElementById('nonVegBtn').classList.remove('active');
+    });
+    
+    document.getElementById('nonVegBtn').addEventListener('click', function() {
+        document.getElementById('nonVegMenu').style.display = 'block';
+        document.getElementById('vegMenu').style.display = 'none';
+        this.classList.add('active');
+        document.getElementById('vegBtn').classList.remove('active');
+    });
+    
+    // Add to cart functionality
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function() {
+            const item = this.dataset.item;
+            const price = parseInt(this.dataset.price);
+            
+            cart.push({ name: item, price: price });
+            updateCartDisplay();
+        });
+    });
+    
+    // Proceed to payment
+    document.getElementById('proceedToPayment').addEventListener('click', function() {
+        if (cart.length > 0) {
+            openPaymentModal('food', cart, cart.reduce((sum, item) => sum + item.price, 0));
+        }
+    });
+    
+    function updateCartDisplay() {
+        const cartItems = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+        const cartCount = document.getElementById('cartCount');
+        const proceedBtn = document.getElementById('proceedToPayment');
+        const viewCartBtn = document.getElementById('viewCartBtn');
+        
+        if (cart.length === 0) {
+            cartItems.innerHTML = '<p class="text-muted text-center">Your cart is empty</p>';
+            proceedBtn.disabled = true;
+            viewCartBtn.disabled = true;
+        } else {
+            let cartHTML = '';
+            cart.forEach(item => {
+                cartHTML += `
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>${item.name}</span>
+                        <span>₹${item.price}</span>
+                    </div>
+                `;
+            });
+            cartItems.innerHTML = cartHTML;
+            proceedBtn.disabled = false;
+            viewCartBtn.disabled = false;
+        }
+        
+        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        cartTotal.textContent = `₹${total}`;
+        cartCount.textContent = cart.length;
+    }
+}
+
+// Sports Booking System
+function initializeSportsBooking() {
+    let selectedSport = null;
+    
+    // Indoor/Outdoor toggle
+    document.getElementById('indoorSportsBtn').addEventListener('click', function() {
+        document.getElementById('indoorSports').style.display = 'block';
+        document.getElementById('outdoorSports').style.display = 'none';
+        this.classList.add('active');
+        document.getElementById('outdoorSportsBtn').classList.remove('active');
+    });
+    
+    document.getElementById('outdoorSportsBtn').addEventListener('click', function() {
+        document.getElementById('outdoorSports').style.display = 'block';
+        document.getElementById('indoorSports').style.display = 'none';
+        this.classList.add('active');
+        document.getElementById('indoorSportsBtn').classList.remove('active');
+    });
+    
+    // Book sport functionality
+    document.querySelectorAll('.book-sport').forEach(button => {
+        button.addEventListener('click', function() {
+            const sport = this.dataset.sport;
+            const price = parseInt(this.dataset.price);
+            
+            selectedSport = { name: sport, price: price };
+            updateSportBookingSummary();
+        });
+    });
+    
+    // Proceed to payment
+    document.getElementById('proceedToSportPayment').addEventListener('click', function() {
+        if (selectedSport) {
+            openPaymentModal('sport', [selectedSport], selectedSport.price);
+        }
+    });
+    
+    function updateSportBookingSummary() {
+        const summaryContainer = document.getElementById('sportBookingSummary');
+        const totalElement = document.getElementById('sportTotal');
+        const proceedBtn = document.getElementById('proceedToSportPayment');
+        const bookActivityBtn = document.getElementById('bookActivityBtn');
+        
+        if (selectedSport) {
+            summaryContainer.innerHTML = `
+                <div class="d-flex justify-content-between mb-2">
+                    <span>${selectedSport.name}</span>
+                    <span>₹${selectedSport.price}</span>
+                </div>
+            `;
+            totalElement.textContent = `₹${selectedSport.price}`;
+            proceedBtn.disabled = false;
+            bookActivityBtn.disabled = false;
+        }
+    }
+}
+
+// Training Booking System
+function initializeTrainingBooking() {
+    let selectedTraining = null;
+    
+    // Training type toggle
+    document.getElementById('yogaBtn').addEventListener('click', function() {
+        showTrainingSection('yogaTraining');
+        this.classList.add('active');
+        document.getElementById('karateBtn').classList.remove('active');
+        document.getElementById('gymBtn').classList.remove('active');
+    });
+    
+    document.getElementById('karateBtn').addEventListener('click', function() {
+        showTrainingSection('karateTraining');
+        this.classList.add('active');
+        document.getElementById('yogaBtn').classList.remove('active');
+        document.getElementById('gymBtn').classList.remove('active');
+    });
+    
+    document.getElementById('gymBtn').addEventListener('click', function() {
+        showTrainingSection('gymTraining');
+        this.classList.add('active');
+        document.getElementById('yogaBtn').classList.remove('active');
+        document.getElementById('karateBtn').classList.remove('active');
+    });
+    
+    // Book session functionality
+    document.querySelectorAll('.book-session').forEach(button => {
+        button.addEventListener('click', function() {
+            const training = this.dataset.training;
+            const price = parseInt(this.dataset.price);
+            
+            selectedTraining = { name: training, price: price };
+            updateTrainingBookingSummary();
+        });
+    });
+    
+    // Proceed to payment
+    document.getElementById('proceedToTrainingPayment').addEventListener('click', function() {
+        if (selectedTraining) {
+            openPaymentModal('training', [selectedTraining], selectedTraining.price);
+        }
+    });
+    
+    function showTrainingSection(sectionId) {
+        document.querySelectorAll('.training-section').forEach(section => {
+            section.style.display = 'none';
+        });
+        document.getElementById(sectionId).style.display = 'block';
+    }
+    
+    function updateTrainingBookingSummary() {
+        const summaryContainer = document.getElementById('trainingBookingSummary');
+        const totalElement = document.getElementById('trainingTotal');
+        const proceedBtn = document.getElementById('proceedToTrainingPayment');
+        const bookTrainingBtn = document.getElementById('bookTrainingBtn');
+        
+        if (selectedTraining) {
+            summaryContainer.innerHTML = `
+                <div class="d-flex justify-content-between mb-2">
+                    <span>${selectedTraining.name}</span>
+                    <span>₹${selectedTraining.price}</span>
+                </div>
+            `;
+            totalElement.textContent = `₹${selectedTraining.price}`;
+            proceedBtn.disabled = false;
+            bookTrainingBtn.disabled = false;
+        }
+    }
+}
+
+// Delete listing via fetch to handle JSON and ensure smooth redirect
+document.addEventListener('DOMContentLoaded', function() {
+    const delBtn = document.getElementById('btn-delete-listing');
+    if (!delBtn) return;
+    delBtn.addEventListener('click', async function() {
+        const id = this.getAttribute('data-id');
+        if (!id) return;
+        if (!confirm('Are you sure you want to delete this listing?')) return;
+    try {
+            const resp = await fetch(`/listings/${id}`, { 
+                method: 'POST',
+                headers: { 
+                    'Accept': 'application/json, text/html,*/*',
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                },
+                body: `_method=DELETE`,
+                credentials: 'same-origin'
+            });
+            if (resp.ok) {
+                try {
+                    const data = await resp.json();
+                    if (data && data.success) {
+                        window.location.href = '/listings';
+                        return;
+                    }
+                } catch(e) {}
+                window.location.href = '/listings';
+            } else {
+                alert('Failed to delete listing. Please try again.');
+            }
+        } catch (err) {
+            console.error('Delete error:', err);
+            alert('An error occurred while deleting the listing.');
+        }
+    });
+});
+
+function openGooglePay() {
+    // Simulate opening Google Pay
+    alert('Opening Google Pay... (This would integrate with actual Google Pay SDK)');
+}
+</script>

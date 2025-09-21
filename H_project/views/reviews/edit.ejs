@@ -1,0 +1,104 @@
+<%- include('../includes/header') %>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Edit Review</h3>
+                </div>
+                <div class="card-body">
+                    <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=PUT" method="POST">
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Review Comment *</label>
+                            <textarea 
+                                class="form-control" 
+                                id="comment" 
+                                name="review[comment]" 
+                                rows="4" 
+                                required 
+                                minlength="3" 
+                                maxlength="500"
+                                placeholder="Share your experience with this property..."
+                            ><%= review.comment %></textarea>
+                            <div class="form-text">Comment must be between 3 and 500 characters.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Rating *</label>
+                            <select class="form-select" id="rating" name="review[rating]" required>
+                                <option value="">Select a rating</option>
+                                <option value="1" <%= review.rating === 1 ? 'selected' : '' %>>1 - Poor</option>
+                                <option value="2" <%= review.rating === 2 ? 'selected' : '' %>>2 - Fair</option>
+                                <option value="3" <%= review.rating === 3 ? 'selected' : '' %>>3 - Good</option>
+                                <option value="4" <%= review.rating === 4 ? 'selected' : '' %>>4 - Very Good</option>
+                                <option value="5" <%= review.rating === 5 ? 'selected' : '' %>>5 - Excellent</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="author" class="form-label">Your Name</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="author" 
+                                name="review[author]" 
+                                value="<%= review.author %>"
+                                minlength="2" 
+                                maxlength="50"
+                                placeholder="Enter your name (optional)"
+                            >
+                            <div class="form-text">Name must be between 2 and 50 characters. Leave blank for anonymous.</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="/listings/<%= listing._id %>" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Review</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Client-side validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const comment = document.getElementById('comment').value.trim();
+    const rating = document.getElementById('rating').value;
+    
+    if (comment.length < 3) {
+        e.preventDefault();
+        alert('Comment must be at least 3 characters long.');
+        return;
+    }
+    
+    if (comment.length > 500) {
+        e.preventDefault();
+        alert('Comment cannot exceed 500 characters.');
+        return;
+    }
+    
+    if (!rating) {
+        e.preventDefault();
+        alert('Please select a rating.');
+        return;
+    }
+    
+    const author = document.getElementById('author').value.trim();
+    if (author && author.length < 2) {
+        e.preventDefault();
+        alert('Author name must be at least 2 characters long.');
+        return;
+    }
+    
+    if (author && author.length > 50) {
+        e.preventDefault();
+        alert('Author name cannot exceed 50 characters.');
+        return;
+    }
+});
+</script>
+
+<%- include('../includes/footer') %>

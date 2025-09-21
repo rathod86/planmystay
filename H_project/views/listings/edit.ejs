@@ -1,0 +1,314 @@
+<% layout("/layouts/boilerplate.ejs")%>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="mb-0 text-center">Edit Listing</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Title</label>
+                                    <input id="title" type="text" name="listing[title]" value="<%= listing.title %>" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="propertyType" class="form-label">Property Type</label>
+                                    <select id="propertyType" name="listing[propertyType]" class="form-control" required>
+                                        <option value="Hotel" <%= listing.propertyType === 'Hotel' ? 'selected' : '' %>>Hotel</option>
+                                        <option value="PG" <%= listing.propertyType === 'PG' ? 'selected' : '' %>>PG (Paying Guest)</option>
+                                        <option value="Land for Sale" <%= listing.propertyType === 'Land for Sale' ? 'selected' : '' %>>Land for Sale</option>
+                                        <option value="Room Rental" <%= listing.propertyType === 'Room Rental' ? 'selected' : '' %>>Room Rental</option>
+                                        <option value="Apartment" <%= listing.propertyType === 'Apartment' ? 'selected' : '' %>>Apartment</option>
+                                        <option value="Business Rental" <%= listing.propertyType === 'Business Rental' ? 'selected' : '' %>>Business Rental (Shop)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="price" class="form-label">Price</label>
+                                    <input id="price" type="number" name="listing[price]" value="<%= listing.price %>" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="pricingPeriod" class="form-label">Pricing Period</label>
+                                    <select id="pricingPeriod" name="listing[pricingPeriod]" class="form-control" required>
+                                        <option value="per night" <%= listing.pricingPeriod === 'per night' ? 'selected' : '' %>>Per Night</option>
+                                        <option value="per week" <%= listing.pricingPeriod === 'per week' ? 'selected' : '' %>>Per Week</option>
+                                        <option value="per month" <%= listing.pricingPeriod === 'per month' ? 'selected' : '' %>>Per Month</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="bedrooms" class="form-label">Bedrooms</label>
+                                    <select id="bedrooms" name="listing[bedrooms]" class="form-control">
+                                        <option value="">Select</option>
+                                        <option value="1BHK" <%= listing.bedrooms === '1BHK' ? 'selected' : '' %>>1BHK</option>
+                                        <option value="2BHK" <%= listing.bedrooms === '2BHK' ? 'selected' : '' %>>2BHK</option>
+                                        <option value="3BHK" <%= listing.bedrooms === '3BHK' ? 'selected' : '' %>>3BHK</option>
+                                        <option value="4BHK" <%= listing.bedrooms === '4BHK' ? 'selected' : '' %>>4BHK</option>
+                                        <option value="5BHK+" <%= listing.bedrooms === '5BHK+' ? 'selected' : '' %>>5BHK+</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="guestCategory" class="form-label">Max Guests</label>
+                                    <select id="guestCategory" class="form-control">
+                                        <option value="">Select category</option>
+                                        <option value="Couple" data-num="2" <%= Number(listing.maxGuests)===2 ? 'selected' : '' %>>Couple (2)</option>
+                                        <option value="Family" data-num="4" <%= Number(listing.maxGuests)===4 ? 'selected' : '' %>>Family (4)</option>
+                                        <option value="Friends" data-num="6" <%= Number(listing.maxGuests)===6 ? 'selected' : '' %>>Friends (6)</option>
+                                        <option value="Large Group" data-num="10" <%= Number(listing.maxGuests)===10 ? 'selected' : '' %>>Large Group (10)</option>
+                                    </select>
+                                    <input type="hidden" id="maxGuests" name="listing[maxGuests]" value="<%= listing.maxGuests || '' %>">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Check-in Time</label>
+                                    <div class="row g-2">
+                                        <% const [ciTime, ciMer] = (listing.checkIn||'12:30 PM').split(' '); const [ciH, ciM] = (ciTime||'12:30').split(':'); %>
+                                        <div class="col-4">
+                                            <select id="checkInHour" class="form-control">
+                                                <% ['01','02','03','04','05','06','07','08','09','10','11','12'].forEach(h=> { %>
+                                                    <option value="<%= h %>" <%= (ciH===h) ? 'selected' : '' %>><%= h %></option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                        <div class="col-4">
+                                            <select id="checkInMinute" class="form-control">
+                                                <% ['00','15','30','45'].forEach(m=> { %>
+                                                    <option value="<%= m %>" <%= (ciM===m) ? 'selected' : '' %>><%= m %></option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                        <div class="col-4">
+                                            <select id="checkInMeridiem" class="form-control">
+                                                <option value="AM" <%= (ciMer==='AM') ? 'selected' : '' %>>AM</option>
+                                                <option value="PM" <%= (ciMer!=='AM') ? 'selected' : '' %>>PM</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="checkIn" name="listing[checkIn]" value="<%= listing.checkIn || '12:30 PM' %>">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Check-out Time</label>
+                                    <div class="row g-2">
+                                        <% const [coTime, coMer] = (listing.checkOut||'09:00 AM').split(' '); const [coH, coM] = (coTime||'09:00').split(':'); %>
+                                        <div class="col-4">
+                                            <select id="checkOutHour" class="form-control">
+                                                <% ['01','02','03','04','05','06','07','08','09','10','11','12'].forEach(h=> { %>
+                                                    <option value="<%= h %>" <%= (coH===h) ? 'selected' : '' %>><%= h %></option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                        <div class="col-4">
+                                            <select id="checkOutMinute" class="form-control">
+                                                <% ['00','15','30','45'].forEach(m=> { %>
+                                                    <option value="<%= m %>" <%= (coM===m) ? 'selected' : '' %>><%= m %></option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                        <div class="col-4">
+                                            <select id="checkOutMeridiem" class="form-control">
+                                                <option value="AM" <%= (coMer==='AM') ? 'selected' : '' %>>AM</option>
+                                                <option value="PM" <%= (coMer!=='AM') ? 'selected' : '' %>>PM</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="checkOut" name="listing[checkOut]" value="<%= listing.checkOut || '09:00 AM' %>">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea id="description" name="listing[description]" class="form-control" rows="3"><%= listing.description %></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <img src="<%= listing.image.url%>" alt="">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="image" class="form-label">New upload Image</label>
+                            <input id="image" type="file" name="listing[image][url]" value="<%= listing.image && listing.image.url %>" class="form-control">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="country" class="form-label">Country</label>
+                                    <input id="country" type="text" name="listing[country]" value="<%= listing.country %>" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="location" class="form-label">Location</label>
+                                    <input id="location" type="text" name="listing[location]" value="<%= listing.location %>" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <input id="phone" type="tel" name="listing[phone]" value="<%= listing.phone %>" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Services -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-secondary text-white">Services</div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <label class="form-label">Food types (comma separated)</label>
+                                    <input type="text" class="form-control" name="listing[services][food]" value="<%= (listing.services?.food||[]).join(', ') %>">
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="chefAvail" name="listing[services][chef][available]" value="true" <%= listing.services?.chef?.available ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="chefAvail">Chef available</label>
+                                        </div>
+                                        <input type="text" class="form-control mt-1" name="listing[services][chef][cuisines]" value="<%= (listing.services?.chef?.cuisines||[]).join(', ') %>">
+                                        <input type="number" class="form-control mt-1" name="listing[services][chef][pricePerMeal]" value="<%= listing.services?.chef?.pricePerMeal || '' %>">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Training</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="yogaAvail" name="listing[services][training][yoga][available]" value="true" <%= listing.services?.training?.yoga?.available ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="yogaAvail">Yoga</label>
+                                        </div>
+                                        <input type="number" class="form-control mt-1" name="listing[services][training][yoga][pricePerSession]" value="<%= listing.services?.training?.yoga?.pricePerSession || '' %>">
+                                        <input type="text" class="form-control mt-2" name="listing[services][training][yoga][description]" value="<%= listing.services?.training?.yoga?.description || '' %>" placeholder="Yoga description">
+                                        <input type="text" class="form-control mt-2" name="listing[services][training][yoga][benefits]" value="<%= (listing.services?.training?.yoga?.benefits||[]).join(', ') %>" placeholder="Yoga benefits (comma separated)">
+                                        <input type="text" class="form-control mt-2" name="listing[services][training][yoga][schedule]" value="<%= listing.services?.training?.yoga?.schedule || '' %>" placeholder="Yoga schedule">
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="checkbox" id="karateAvail" name="listing[services][training][karate][available]" value="true" <%= listing.services?.training?.karate?.available ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="karateAvail">Karate</label>
+                                        </div>
+                                        <input type="number" class="form-control mt-1" name="listing[services][training][karate][pricePerSession]" value="<%= listing.services?.training?.karate?.pricePerSession || '' %>">
+                                        <input type="text" class="form-control mt-2" name="listing[services][training][karate][description]" value="<%= listing.services?.training?.karate?.description || '' %>" placeholder="Karate description">
+                                        <input type="text" class="form-control mt-2" name="listing[services][training][karate][benefits]" value="<%= (listing.services?.training?.karate?.benefits||[]).join(', ') %>" placeholder="Karate benefits (comma separated)">
+                                        <input type="text" class="form-control mt-2" name="listing[services][training][karate][schedule]" value="<%= listing.services?.training?.karate?.schedule || '' %>" placeholder="Karate schedule">
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="checkbox" id="gymAvail" name="listing[services][training][gym][available]" value="true" <%= listing.services?.training?.gym?.available ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="gymAvail">Gym</label>
+                                        </div>
+                                        <input type="number" class="form-control mt-1" name="listing[services][training][gym][dayPassPrice]" value="<%= listing.services?.training?.gym?.dayPassPrice || '' %>">
+                                        <input type="text" class="form-control mt-2" name="listing[services][training][gym][description]" value="<%= listing.services?.training?.gym?.description || '' %>" placeholder="Gym description">
+                                        <input type="text" class="form-control mt-2" name="listing[services][training][gym][benefits]" value="<%= (listing.services?.training?.gym?.benefits||[]).join(', ') %>" placeholder="Gym benefits (comma separated)">
+                                        <input type="text" class="form-control mt-2" name="listing[services][training][gym][schedule]" value="<%= listing.services?.training?.gym?.schedule || '' %>" placeholder="Gym schedule">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Massage</label>
+                                        <input type="text" class="form-control" name="listing[services][massage][types]" value="<%= (listing.services?.massage?.types||[]).join(', ') %>">
+                                        <input type="text" class="form-control mt-1" name="listing[services][massage][priceList]" value="<%= (listing.services?.massage?.priceList||[]).map(p=>`${p.name}:${p.price}`).join(', ') %>">
+                                    </div>
+                                </div>
+                                <div class="row g-2 mt-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Event arrangements</label>
+                                        <input type="text" class="form-control" name="listing[services][events][supported]" value="<%= (listing.services?.events?.supported||[]).join(', ') %>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Sports</label>
+                                        <input type="text" class="form-control mb-1" name="listing[services][sports][indoor]" value="<%= (listing.services?.sports?.indoor||[]).join(', ') %>">
+                                        <input type="text" class="form-control" name="listing[services][sports][outdoor]" value="<%= (listing.services?.sports?.outdoor||[]).join(', ') %>">
+                                    </div>
+                                </div>
+                                <div class="row g-2 mt-2">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="groundAvail" name="listing[services][sportsGroundForRent][available]" value="true" <%= listing.services?.sportsGroundForRent?.available ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="groundAvail">Sports ground for rent</label>
+                                        </div>
+                                        <input type="text" class="form-control mt-1" name="listing[services][sportsGroundForRent][groundType]" value="<%= listing.services?.sportsGroundForRent?.groundType || '' %>">
+                                        <input type="number" class="form-control mt-1" name="listing[services][sportsGroundForRent][hourlyRate]" value="<%= listing.services?.sportsGroundForRent?.hourlyRate || '' %>">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Media -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-secondary text-white">Media</div>
+                            <div class="card-body">
+                                <div class="row g-2">
+                                    <div class="col-md-4"><input class="form-control" name="listing[media][instagram]" value="<%= listing.media?.instagram || '' %>" placeholder="Instagram URL"></div>
+                                    <div class="col-md-4"><input class="form-control" name="listing[media][facebook]" value="<%= listing.media?.facebook || '' %>" placeholder="Facebook URL"></div>
+                                    <div class="col-md-4"><input class="form-control" name="listing[media][website]" value="<%= listing.media?.website || '' %>" placeholder="Website URL"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-dark update-btn px-4">Update Listing</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Map guest category to hidden numeric input
+    const guestCategory = document.getElementById('guestCategory');
+    const maxGuestsHidden = document.getElementById('maxGuests');
+    if (guestCategory && maxGuestsHidden) {
+        guestCategory.addEventListener('change', function() {
+            const selected = this.options[this.selectedIndex];
+            const num = selected.getAttribute('data-num') || '';
+            maxGuestsHidden.value = num;
+        });
+    }
+
+    function formatTime(hh, mm, meridiem) {
+        return `${hh}:${mm} ${meridiem}`;
+    }
+
+    // Sync Check-in hidden field
+    const ciH = document.getElementById('checkInHour');
+    const ciM = document.getElementById('checkInMinute');
+    const ciMer = document.getElementById('checkInMeridiem');
+    const ciHidden = document.getElementById('checkIn');
+    function syncCheckIn() {
+        if (ciHidden) ciHidden.value = formatTime(ciH.value, ciM.value, ciMer.value);
+    }
+    [ciH, ciM, ciMer].forEach(el => el && el.addEventListener('change', syncCheckIn));
+    syncCheckIn();
+
+    // Sync Check-out hidden field
+    const coH = document.getElementById('checkOutHour');
+    const coM = document.getElementById('checkOutMinute');
+    const coMer = document.getElementById('checkOutMeridiem');
+    const coHidden = document.getElementById('checkOut');
+    function syncCheckOut() {
+        if (coHidden) coHidden.value = formatTime(coH.value, coM.value, coMer.value);
+    }
+    [coH, coM, coMer].forEach(el => el && el.addEventListener('change', syncCheckOut));
+    syncCheckOut();
+});
+</script>
+</div>

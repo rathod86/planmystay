@@ -1,0 +1,118 @@
+
+<% layout("/layouts/boilerplate.ejs")%>
+
+<body>
+    
+<div class="d-flex align-items-center justify-content-between">
+  <h3 class="mb-3">All Listings</h3>
+  <form class="d-flex" method="GET" action="/listings">
+    <select name="type" class="form-select me-2 flex-shrink-0" style="max-width: 180px;">
+      <option value="">All types</option>
+      <option value="Apartment">Apartment</option>
+      <option value="Reception Hall">Reception Hall</option>
+      <option value="Marriage Hall">Marriage Hall</option>
+      <option value="Room Rental">Room Rental</option>
+      <option value="PG">PG</option>
+      <option value="Hotel">Hotel</option>
+      <option value="Business Rental">Business Rental</option>
+      <option value="Land for Sale">Land for Sale</option>
+    </select>
+    <input class="form-control me-2" type="search" name="q" placeholder="Search title or location">
+    <button class="btn btn-dark text-nowrap px-3 flex-shrink-0" type="submit" style="min-width: 90px;">Search</button>
+  </form>
+</div>
+
+<% if (allListings && allListings.length > 0) { %>
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+  <% for(let listing of allListings) { %>
+    <div class="col">
+      <a href="/listings/<%= listing._id %>" class="listing-link text-decoration-none">
+        <div class="card h-100 listing-card">
+          <img src="<%= listing.image && listing.image.url ? listing.image.url : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=200&fit=crop' %>" 
+               class="card-img-top" alt="listing_image" height="200rem"/>
+          <div class="card-body">
+            <h5 class="card-title"><%= listing.title %></h5>
+            <p class="card-text">
+              <% if (listing.propertyType === 'Hotel') { %>
+                  <span class="badge bg-primary mb-2"><%= listing.propertyType %></span>
+              <% } else if (listing.propertyType === 'PG') { %>
+                  <span class="badge bg-success mb-2"><%= listing.propertyType %></span>
+              <% } else if (listing.propertyType === 'Land for Sale') { %>
+                  <span class="badge bg-warning mb-2"><%= listing.propertyType %></span>
+              <% } else if (listing.propertyType === 'Room Rental') { %>
+                  <span class="badge bg-info mb-2"><%= listing.propertyType %></span>
+              <% } else if (listing.propertyType === 'Apartment') { %>
+                  <span class="badge bg-secondary mb-2"><%= listing.propertyType %></span>
+              <% } else if (listing.propertyType === 'Business Rental') { %>
+                  <span class="badge bg-danger mb-2"><%= listing.propertyType %></span>
+              <% } else if (listing.propertyType === 'Reception Hall') { %>
+                  <span class="badge bg-warning mb-2"><%= listing.propertyType %></span>
+              <% } else if (listing.propertyType === 'Marriage Hall') { %>
+                  <span class="badge bg-info mb-2"><%= listing.propertyType %></span>
+              <% } else { %>
+                  <span class="badge bg-primary mb-2"><%= listing.propertyType %></span>
+              <% } %>
+              <br/>
+              <strong class="text-success">₹<%= listing.price ? listing.price.toLocaleString("en-IN") : '0' %> <%= listing.pricingPeriod || 'per night' %></strong>
+              <br/>
+              <small class="text-muted">
+                <i class="fas fa-map-marker-alt me-1"></i><%= listing.location || 'Location not specified' %>
+              </small>
+              <br/>
+              <small class="text-muted">
+                <i class="fas fa-phone me-1"></i><%= listing.phone || 'No phone' %>
+              </small>
+            </p>
+          </div>
+        </div>
+      </a>
+    </div>
+  <% } %>
+</div>
+<% } else { %>
+<div class="text-center py-5">
+  <div class="empty-state">
+    <i class="fas fa-home fa-4x text-muted mb-3"></i>
+    <h4 class="text-muted">No Listings Found</h4>
+    <p class="text-muted">Be the first to add a listing!</p>
+    <a href="/listings/new" class="btn btn-primary btn-lg">
+      <i class="fas fa-plus me-2"></i>Add New Listing
+    </a>
+  </div>
+</div>
+<% } %>
+
+<style>
+.listing-card {
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.listing-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.listing-link {
+  color: inherit;
+}
+
+.listing-link:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.empty-state {
+  padding: 3rem;
+}
+
+.card-img-top {
+  object-fit: cover;
+}
+
+.badge {
+  font-size: 0.8rem;
+}
+</style>
+</body>

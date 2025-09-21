@@ -1,0 +1,251 @@
+<% layout("/layouts/boilerplate.ejs")%>
+
+<div class="container-fluid">
+    <!-- Hero Section -->
+    <div class="row bg-gradient text-white py-5 mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="col-12 text-center">
+            <h1 class="display-4 mb-3 fw-bold">📍 <%= place.name %></h1>
+            <p class="lead fs-4"><%= place.location.name %></p>
+            <div class="mt-4">
+                <span class="badge bg-light text-dark fs-6 px-3 py-2">
+                    <%= place.type === 'night_out' ? '🌙' : place.type === 'vacation' ? '🏖️' : place.type === 'picnic' ? '🧺' : '🎯' %>
+                    <%= place.type.charAt(0).toUpperCase() + place.type.slice(1).replace('_', ' ') %>
+                </span>
+                <span class="badge bg-warning text-dark fs-6 px-3 py-2 ms-2">
+                    ⭐ <%= place.rating.average.toFixed(1) %> (<%= place.rating.count %> reviews)
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Left Column - Details -->
+        <div class="col-lg-8">
+            <!-- Images -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-body p-0">
+                    <% if (place.images && place.images.length > 0) { %>
+                        <div id="imageCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                <% place.images.forEach((image, index) => { %>
+                                    <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                        <img src="<%= image.url %>" class="d-block w-100" style="height: 400px; object-fit: cover;" alt="<%= image.caption || place.name %>">
+                                    </div>
+                                <% }); %>
+                            </div>
+                            <% if (place.images.length > 1) { %>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#imageCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#imageCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            <% } %>
+                        </div>
+                    <% } else { %>
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-image fa-3x mb-3"></i>
+                                <p>No images available</p>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-body p-4">
+                    <h3 class="card-title text-primary mb-3">
+                        <i class="fas fa-info-circle me-2"></i>About This Place
+                    </h3>
+                    <p class="card-text fs-5"><%= place.description %></p>
+                </div>
+            </div>
+
+            <!-- Activities -->
+            <% if (place.activities && place.activities.length > 0) { %>
+                <div class="card shadow-lg border-0 mb-4">
+                    <div class="card-body p-4">
+                        <h3 class="card-title text-success mb-3">
+                            <i class="fas fa-tasks me-2"></i>Activities
+                        </h3>
+                        <div class="row">
+                            <% place.activities.forEach(activity => { %>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle text-success me-3"></i>
+                                        <div>
+                                            <h6 class="mb-1"><%= activity.name %></h6>
+                                            <% if (activity.description) { %>
+                                                <small class="text-muted"><%= activity.description %></small>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Amenities -->
+            <% if (place.amenities && place.amenities.length > 0) { %>
+                <div class="card shadow-lg border-0 mb-4">
+                    <div class="card-body p-4">
+                        <h3 class="card-title text-info mb-3">
+                            <i class="fas fa-star me-2"></i>Amenities
+                        </h3>
+                        <div class="row">
+                            <% place.amenities.forEach(amenity => { %>
+                                <div class="col-md-4 mb-2">
+                                    <span class="badge bg-light text-dark fs-6 px-3 py-2">
+                                        <i class="fas fa-check me-1"></i><%= amenity.replace('_', ' ').toUpperCase() %>
+                                    </span>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Reviews -->
+            <% if (place.reviews && place.reviews.length > 0) { %>
+                <div class="card shadow-lg border-0 mb-4">
+                    <div class="card-body p-4">
+                        <h3 class="card-title text-warning mb-3">
+                            <i class="fas fa-comments me-2"></i>Reviews (<%= place.reviews.length %>)
+                        </h3>
+                        <% place.reviews.forEach(review => { %>
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1"><%= review.author ? review.author.username : 'Anonymous' %></h6>
+                                        <div class="text-warning mb-2">
+                                            <% for (let i = 0; i < 5; i++) { %>
+                                                <i class="fas fa-star<%= i < review.rating ? '' : '-o' %>"></i>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted"><%= new Date(review.createdAt).toLocaleDateString() %></small>
+                                </div>
+                                <p class="mb-0"><%= review.comment %></p>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Right Column - Booking Info -->
+        <div class="col-lg-4">
+            <!-- Pricing Card -->
+            <div class="card shadow-lg border-0 mb-4 sticky-top" style="top: 20px;">
+                <div class="card-body p-4">
+                    <h3 class="card-title text-primary mb-3">
+                        <i class="fas fa-tag me-2"></i>Pricing
+                    </h3>
+                    <div class="text-center mb-4">
+                        <h2 class="text-primary fw-bold">₹<%= place.pricing.basePrice.toLocaleString('en-IN') %></h2>
+                        <p class="text-muted"><%= place.pricing.pricingType.replace('_', '/') %></p>
+                    </div>
+                    
+                    <!-- Capacity -->
+                    <div class="mb-3">
+                        <h6><i class="fas fa-users me-2"></i>Capacity</h6>
+                        <p class="mb-0">Up to <%= place.capacity.max %> people</p>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="mb-3">
+                        <h6><i class="fas fa-clock me-2"></i>Duration</h6>
+                        <p class="mb-0"><%= place.duration.min %> - <%= place.duration.max %> hours</p>
+                        <small class="text-muted">Recommended: <%= place.duration.recommended %> hours</small>
+                    </div>
+
+                    <!-- Best Time to Visit -->
+                    <div class="mb-3">
+                        <h6><i class="fas fa-calendar me-2"></i>Best Time to Visit</h6>
+                        <p class="mb-1">
+                            <span class="badge bg-info me-1"><%= place.bestTimeToVisit.seasons.join(', ') %></span>
+                        </p>
+                        <small class="text-muted">
+                            Months: <%= place.bestTimeToVisit.months.map(m => new Date(2024, m-1).toLocaleString('default', {month: 'short'})).join(', ') %>
+                        </small>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <% if (place.contact) { %>
+                        <div class="mb-3">
+                            <h6><i class="fas fa-phone me-2"></i>Contact</h6>
+                            <% if (place.contact.phone) { %>
+                                <p class="mb-1"><i class="fas fa-phone me-2"></i><%= place.contact.phone %></p>
+                            <% } %>
+                            <% if (place.contact.email) { %>
+                                <p class="mb-1"><i class="fas fa-envelope me-2"></i><%= place.contact.email %></p>
+                            <% } %>
+                        </div>
+                    <% } %>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary btn-lg" onclick="contactOwner()">
+                            <i class="fas fa-phone me-2"></i>Contact Owner
+                        </button>
+                        <button class="btn btn-outline-primary btn-lg" onclick="sharePlace()">
+                            <i class="fas fa-share me-2"></i>Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Info -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-body p-4">
+                    <h3 class="card-title text-success mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>Location
+                    </h3>
+                    <p class="mb-2"><strong><%= place.location.name %></strong></p>
+                    <% if (place.location.address) { %>
+                        <p class="mb-2"><%= place.location.address %></p>
+                    <% } %>
+                    <p class="mb-2">
+                        <%= place.location.city %>, <%= place.location.state %>, <%= place.location.country %>
+                    </p>
+                    <button class="btn btn-outline-success w-100" onclick="openInMaps()">
+                        <i class="fas fa-directions me-2"></i>Get Directions
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function contactOwner() {
+    alert('Contact functionality will be implemented soon!');
+}
+
+function sharePlace() {
+    if (navigator.share) {
+        navigator.share({
+            title: '<%= place.name %>',
+            text: '<%= place.description.substring(0, 100) %>...',
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Link copied to clipboard!');
+        });
+    }
+}
+
+function openInMaps() {
+    const lat = <%= place.location.coordinates.latitude %>;
+    const lng = <%= place.location.coordinates.longitude %>;
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+    window.open(url, '_blank');
+}
+</script>

@@ -1,0 +1,902 @@
+<% layout("/layouts/boilerplate.ejs")%>
+
+<!-- Enhanced Add Listing Page -->
+<div class="add-listing-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Header Section -->
+                <div class="listing-header text-center mb-5">
+                    <h1 class="listing-title">
+                        <i class="fas fa-plus-circle me-3"></i>Create New Listing
+                    </h1>
+                    <p class="listing-subtitle">Share your amazing property with travelers worldwide</p>
+                </div>
+
+                <form method="POST" action="/listings" novalidate class="needs-validation listing-form" enctype="multipart/form-data" id="listingForm">
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input id="title" type="text" name="listing[title]" placeholder="Enter title" class="form-control" required>
+            <div class="invalid-feedback">Title should be valid</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="propertyType" class="form-label">Property Type</label>
+            <select id="propertyType" name="listing[propertyType]" class="form-control" required>
+                <option value="">Select Property Type</option>
+                <option value="Hotel">Hotel</option>
+                <option value="PG">PG (Paying Guest)</option>
+                <option value="Land for Sale">Land for Sale</option>
+                <option value="Room Rental">Room Rental</option>
+                <option value="Apartment">Apartment</option>
+                <option value="Reception Hall">Reception Hall</option>
+                <option value="Event Hall">Event Hall</option>
+                <option value="Business Rental">Business Rental (Shop)</option>
+            </select>
+            <div class="invalid-feedback">Please select a property type</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea id="description" name="listing[description]" placeholder="Enter description" class="form-control" rows="3"></textarea>
+        </div>
+
+        <!-- Enhanced Image Upload Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="fas fa-images me-2"></i>Property Images</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Main Image *</label>
+                            <input id="image" type="file" name="listing[image]" class="form-control" accept="image/*" required>
+                            <div class="form-text">Upload the main image for your listing (required)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+        <div class="mb-3">
+                            <label for="gallery" class="form-label">Additional Images</label>
+                            <input id="gallery" type="file" name="gallery" class="form-control" accept="image/*" multiple>
+                            <div class="form-text">Upload up to 5 additional images</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Image Preview Area -->
+                <div class="image-preview-container">
+                    <div class="row" id="imagePreview">
+                        <!-- Images will be previewed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="price" class="form-label">Price</label>
+                    <input id="price" type="number" name="listing[price]" placeholder="Enter price" class="form-control" required>
+                    <div class="invalid-feedback">Price should be valid</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="pricingPeriod" class="form-label">Pricing Period</label>
+                    <select id="pricingPeriod" name="listing[pricingPeriod]" class="form-control" required>
+                        <option value="per night">Per Night</option>
+                        <option value="per week">Per Week</option>
+                        <option value="per month">Per Month</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input id="location" type="text" name="listing[location]" placeholder="Enter location" class="form-control" required>
+                    <div class="invalid-feedback">Location should be valid</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="country" class="form-label">Country</label>
+                    <input id="country" type="text" name="listing[country]" placeholder="Enter country" class="form-control" required>
+                    <div class="invalid-feedback">Country should be valid</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Property Details Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0"><i class="fas fa-home me-2"></i>Property Details</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Contact Phone *</label>
+                            <input id="phone" type="tel" name="listing[phone]" placeholder="Enter phone number" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Contact Email</label>
+                            <input id="email" type="email" name="listing[email]" placeholder="Enter email address" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="bedrooms" class="form-label">Bedrooms</label>
+                            <select id="bedrooms" name="listing[bedrooms]" class="form-control">
+                                <option value="">Select</option>
+                                <option value="1BHK">1BHK</option>
+                                <option value="2BHK">2BHK</option>
+                                <option value="3BHK">3BHK</option>
+                                <option value="4BHK">4BHK</option>
+                                <option value="5BHK+">5BHK+</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="bathrooms" class="form-label">Bathrooms</label>
+                            <select id="bathrooms" name="listing[bathrooms]" class="form-control">
+                                <option value="">Select</option>
+                                <option value="1">1 Bathroom</option>
+                                <option value="2">2 Bathrooms</option>
+                                <option value="3">3 Bathrooms</option>
+                                <option value="4+">4+ Bathrooms</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="guestCategory" class="form-label">Max Guests</label>
+                            <select id="guestCategory" class="form-control">
+                                <option value="">Select category</option>
+                                <option value="Couple" data-num="2">Couple (2)</option>
+                                <option value="Family" data-num="4">Family (4)</option>
+                                <option value="Friends" data-num="6">Friends (6)</option>
+                                <option value="Large Group" data-num="10">Large Group (10)</option>
+                            </select>
+                            <input type="hidden" id="maxGuests" name="listing[maxGuests]" value="">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Check-in Time</label>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <select id="checkInHour" class="form-control">
+                                        <option value="01">01</option>
+                                        <option value="02">02</option>
+                                        <option value="03">03</option>
+                                        <option value="04">04</option>
+                                        <option value="05">05</option>
+                                        <option value="06">06</option>
+                                        <option value="07">07</option>
+                                        <option value="08">08</option>
+                                        <option value="09">09</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12" selected>12</option>
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <select id="checkInMinute" class="form-control">
+                                        <option value="00">00</option>
+                                        <option value="15">15</option>
+                                        <option value="30" selected>30</option>
+                                        <option value="45">45</option>
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <select id="checkInMeridiem" class="form-control">
+                                        <option value="AM">AM</option>
+                                        <option value="PM" selected>PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <input type="hidden" id="checkIn" name="listing[checkIn]" value="12:30 PM">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Check-out Time</label>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <select id="checkOutHour" class="form-control">
+                                        <option value="01">01</option>
+                                        <option value="02">02</option>
+                                        <option value="03">03</option>
+                                        <option value="04">04</option>
+                                        <option value="05">05</option>
+                                        <option value="06">06</option>
+                                        <option value="07">07</option>
+                                        <option value="08">08</option>
+                                        <option value="09" selected>09</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <select id="checkOutMinute" class="form-control">
+                                        <option value="00" selected>00</option>
+                                        <option value="15">15</option>
+                                        <option value="30">30</option>
+                                        <option value="45">45</option>
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <select id="checkOutMeridiem" class="form-control">
+                                        <option value="AM" selected>AM</option>
+                                        <option value="PM">PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <input type="hidden" id="checkOut" name="listing[checkOut]" value="09:00 AM">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Amenities Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="fas fa-star me-2"></i>Amenities & Features</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Basic Amenities</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="wifi" name="listing[amenities][]" value="WiFi">
+                                    <label class="form-check-label" for="wifi">WiFi</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="parking" name="listing[amenities][]" value="Parking">
+                                    <label class="form-check-label" for="parking">Parking</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="ac" name="listing[amenities][]" value="Air Conditioning">
+                                    <label class="form-check-label" for="ac">Air Conditioning</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="heating" name="listing[amenities][]" value="Heating">
+                                    <label class="form-check-label" for="heating">Heating</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="kitchen" name="listing[amenities][]" value="Kitchen">
+                                    <label class="form-check-label" for="kitchen">Kitchen</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="tv" name="listing[amenities][]" value="TV">
+                                    <label class="form-check-label" for="tv">TV</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="pool" name="listing[amenities][]" value="Swimming Pool">
+                                    <label class="form-check-label" for="pool">Swimming Pool</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="gym" name="listing[amenities][]" value="Gym">
+                                    <label class="form-check-label" for="gym">Gym</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Safety & Security</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="smokeAlarm" name="listing[amenities][]" value="Smoke Alarm">
+                                    <label class="form-check-label" for="smokeAlarm">Smoke Alarm</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="security" name="listing[amenities][]" value="Security System">
+                                    <label class="form-check-label" for="security">Security System</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="firstAid" name="listing[amenities][]" value="First Aid Kit">
+                                    <label class="form-check-label" for="firstAid">First Aid Kit</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="cctv" name="listing[amenities][]" value="CCTV">
+                                    <label class="form-check-label" for="cctv">CCTV</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="locks" name="listing[amenities][]" value="Secure Locks">
+                                    <label class="form-check-label" for="locks">Secure Locks</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="fireExtinguisher" name="listing[amenities][]" value="Fire Extinguisher">
+                                    <label class="form-check-label" for="fireExtinguisher">Fire Extinguisher</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services -->
+        <div class="card mb-3">
+            <div class="card-header bg-secondary text-white">Services</div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <label class="form-label">Food types (comma separated)</label>
+                    <input type="text" class="form-control" name="listing[services][food]" placeholder="Veg, Non-Veg, Vegan">
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="chefAvail" name="listing[services][chef][available]" value="true">
+                            <label class="form-check-label" for="chefAvail">Chef available</label>
+                        </div>
+                        <input type="text" class="form-control mt-1" name="listing[services][chef][cuisines]" placeholder="Indian, Italian">
+                        <input type="number" class="form-control mt-1" name="listing[services][chef][pricePerMeal]" placeholder="Price per meal (₹)">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Training</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="yogaAvail" name="listing[services][training][yoga][available]" value="true">
+                            <label class="form-check-label" for="yogaAvail">Yoga</label>
+                        </div>
+                        <input type="number" class="form-control mt-1" name="listing[services][training][yoga][pricePerSession]" placeholder="Yoga price per session (₹)">
+                        <input type="text" class="form-control mt-2" name="listing[services][training][yoga][description]" placeholder="Yoga description">
+                        <input type="text" class="form-control mt-2" name="listing[services][training][yoga][benefits]" placeholder="Yoga benefits (comma separated)">
+                        <input type="text" class="form-control mt-2" name="listing[services][training][yoga][schedule]" placeholder="Yoga schedule e.g., Mon-Fri 6-8 AM">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="karateAvail" name="listing[services][training][karate][available]" value="true">
+                            <label class="form-check-label" for="karateAvail">Karate</label>
+                        </div>
+                        <input type="number" class="form-control mt-1" name="listing[services][training][karate][pricePerSession]" placeholder="Karate price per session (₹)">
+                        <input type="text" class="form-control mt-2" name="listing[services][training][karate][description]" placeholder="Karate description">
+                        <input type="text" class="form-control mt-2" name="listing[services][training][karate][benefits]" placeholder="Karate benefits (comma separated)">
+                        <input type="text" class="form-control mt-2" name="listing[services][training][karate][schedule]" placeholder="Karate schedule">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="gymAvail" name="listing[services][training][gym][available]" value="true">
+                            <label class="form-check-label" for="gymAvail">Gym</label>
+                        </div>
+                        <input type="number" class="form-control mt-1" name="listing[services][training][gym][dayPassPrice]" placeholder="Gym day pass price (₹)">
+                        <input type="text" class="form-control mt-2" name="listing[services][training][gym][description]" placeholder="Gym description">
+                        <input type="text" class="form-control mt-2" name="listing[services][training][gym][benefits]" placeholder="Gym benefits (comma separated)">
+                        <input type="text" class="form-control mt-2" name="listing[services][training][gym][schedule]" placeholder="Gym schedule">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Massage</label>
+                        <input type="text" class="form-control" name="listing[services][massage][types]" placeholder="Ayurvedic, Swedish">
+                        <input type="text" class="form-control mt-1" name="listing[services][massage][priceList]" placeholder="Deep Tissue:1500, Head:800">
+                    </div>
+                </div>
+                <div class="row g-2 mt-2">
+                    <div class="col-md-6">
+                        <label class="form-label">Event arrangements</label>
+                        <input type="text" class="form-control" name="listing[services][events][supported]" placeholder="Birthday, Marriage, Corporate">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Sports</label>
+                        <input type="text" class="form-control mb-1" name="listing[services][sports][indoor]" placeholder="Indoor: Carrom, Table Tennis">
+                        <input type="text" class="form-control mb-2" name="listing[services][sports][outdoor]" placeholder="Outdoor: Cricket, Football">
+                        <label class="form-label">Sports Image</label>
+                        <input type="file" class="form-control" name="sportsImage" accept="image/*">
+                        <div class="form-text">Upload an image showcasing sports facilities</div>
+                    </div>
+                </div>
+                <div class="row g-2 mt-2">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="groundAvail" name="listing[services][sportsGroundForRent][available]" value="true">
+                            <label class="form-check-label" for="groundAvail">Sports ground for rent</label>
+                        </div>
+                        <input type="text" class="form-control mt-1" name="listing[services][sportsGroundForRent][groundType]" placeholder="Cricket/Football">
+                        <input type="number" class="form-control mt-1" name="listing[services][sportsGroundForRent][hourlyRate]" placeholder="Hourly rate (₹)">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Media -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">Media</div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-4"><input class="form-control" name="listing[media][instagram]" placeholder="Instagram URL"></div>
+                    <div class="col-md-4"><input class="form-control" name="listing[media][facebook]" placeholder="Facebook URL"></div>
+                    <div class="col-md-4"><input class="form-control" name="listing[media][website]" placeholder="Website URL"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Price Prediction Section -->
+        <div class="card border-primary mb-4">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">🤖 AI Price Prediction</h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Get AI-powered price suggestions based on market data, demand, and local events.</p>
+                <button type="button" class="btn btn-outline-primary" onclick="getAIPrediction()">
+                    Get AI Price Suggestion
+                </button>
+                <div id="aiPrediction" class="mt-3" style="display: none;">
+                    <div class="alert alert-info">
+                        <strong>AI Suggested Price:</strong> <span id="aiPrice"></span>
+                        <br><small>Confidence: <span id="aiConfidence"></span>%</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0"><i class="fas fa-credit-card me-2"></i>Payment Methods</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Online Payment Methods</h6>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="googlePay" name="listing[paymentMethods][]" value="Google Pay">
+                                    <label class="form-check-label" for="googlePay">
+                                        <i class="fab fa-google-pay text-primary me-1"></i>Google Pay
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="phonePe" name="listing[paymentMethods][]" value="PhonePe">
+                                    <label class="form-check-label" for="phonePe">
+                                        <i class="fas fa-mobile-alt text-info me-1"></i>PhonePe
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="paytm" name="listing[paymentMethods][]" value="Paytm">
+                                    <label class="form-check-label" for="paytm">
+                                        <i class="fas fa-wallet text-blue me-1"></i>Paytm
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="upi" name="listing[paymentMethods][]" value="UPI">
+                                    <label class="form-check-label" for="upi">
+                                        <i class="fas fa-qrcode text-success me-1"></i>UPI
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Payment Details</h6>
+                        <div class="mb-3">
+                            <label for="upiId" class="form-label">UPI ID</label>
+                            <input id="upiId" type="text" name="listing[upiId]" placeholder="yourname@paytm" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="bankAccount" class="form-label">Bank Account Number</label>
+                            <input id="bankAccount" type="text" name="listing[bankAccount]" placeholder="Account number" class="form-control">
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="cashOnDelivery" name="listing[paymentMethods][]" value="Cash on Delivery">
+                            <label class="form-check-label" for="cashOnDelivery">
+                                <i class="fas fa-money-bill-wave text-success me-1"></i>Cash on Delivery
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center mb-5">
+            <button type="submit" class="btn btn-primary btn-lg add-btn me-3">
+                <i class="fas fa-save me-2"></i>Create Listing
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="window.history.back()">
+                <i class="fas fa-arrow-left me-2"></i>Cancel
+            </button>
+        </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<style>
+/* Enhanced Add Listing Page Styles */
+.add-listing-container {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.listing-header {
+    margin-bottom: 3rem;
+}
+
+.listing-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #ff7043, #ff5722, #e91e63);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.listing-subtitle {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 0;
+}
+
+.listing-form {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+    border: none;
+    padding: 1.5rem;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #ff7043;
+    box-shadow: 0 0 0 0.2rem rgba(255, 112, 67, 0.25);
+    transform: translateY(-1px);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.form-check-input:checked {
+    background-color: #ff7043;
+    border-color: #ff7043;
+}
+
+.image-preview-container {
+    margin-top: 1rem;
+}
+
+.image-preview {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.image-preview img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+}
+
+.image-preview .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(220, 53, 69, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.add-btn {
+    background: linear-gradient(135deg, #ff7043, #ff5722, #e91e63);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 15px 40px;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.add-btn:hover {
+    background: linear-gradient(135deg, #ff5722, #e64a19, #c2185b);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(255, 112, 67, 0.4);
+}
+
+.add-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.add-btn:hover::before {
+    left: 100%;
+}
+
+/* Dark mode styles */
+[data-theme="dark"] .add-listing-container {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+}
+
+[data-theme="dark"] .listing-form {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .listing-title {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .listing-subtitle {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .form-control, .form-select {
+    background: var(--bg-tertiary);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-control:focus, .form-select:focus {
+    background: var(--bg-secondary);
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-label {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .card {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .listing-title {
+        font-size: 2rem;
+    }
+    
+    .listing-form {
+        padding: 2rem 1.5rem;
+    }
+    
+    .add-btn {
+        padding: 12px 30px;
+        font-size: 1rem;
+    }
+}
+</style>
+
+<script>
+// Image preview functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('image');
+    const galleryInput = document.getElementById('gallery');
+    const imagePreview = document.getElementById('imagePreview');
+    
+    // Main image preview
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.innerHTML = `
+                    <div class="col-md-4">
+                        <div class="image-preview">
+                            <img src="${e.target.result}" alt="Main Image">
+                            <button type="button" class="remove-image" onclick="removeImage(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Gallery images preview
+    galleryInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            files.forEach((file, index) => {
+                if (index < 5) { // Limit to 5 images
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const existingImages = imagePreview.children.length;
+                        if (existingImages < 6) { // 1 main + 5 gallery
+                            const colClass = existingImages === 0 ? 'col-md-4' : 'col-md-3';
+                            imagePreview.innerHTML += `
+                                <div class="${colClass}">
+                                    <div class="image-preview">
+                                        <img src="${e.target.result}" alt="Gallery Image ${index + 1}">
+                                        <button type="button" class="remove-image" onclick="removeImage(this)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+    
+    // Form validation
+    const form = document.getElementById('listingForm');
+    form.addEventListener('submit', function(e) {
+        const requiredFields = ['title', 'propertyType', 'price', 'location', 'country', 'phone'];
+        let isValid = true;
+        
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields');
+        }
+    });
+    
+    // Real-time validation
+    const inputs = document.querySelectorAll('input[required], select[required]');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+    });
+
+    // Map guest category to hidden numeric input
+    const guestCategory = document.getElementById('guestCategory');
+    const maxGuestsHidden = document.getElementById('maxGuests');
+    if (guestCategory && maxGuestsHidden) {
+        guestCategory.addEventListener('change', function() {
+            const selected = this.options[this.selectedIndex];
+            const num = selected.getAttribute('data-num') || '';
+            maxGuestsHidden.value = num;
+        });
+    }
+
+    // Helper to format time like "HH:MM AM/PM"
+    function formatTime(hh, mm, meridiem) {
+        return `${hh}:${mm} ${meridiem}`;
+    }
+
+    // Sync Check-in hidden field
+    const ciH = document.getElementById('checkInHour');
+    const ciM = document.getElementById('checkInMinute');
+    const ciMer = document.getElementById('checkInMeridiem');
+    const ciHidden = document.getElementById('checkIn');
+    function syncCheckIn() {
+        if (ciHidden) ciHidden.value = formatTime(ciH.value, ciM.value, ciMer.value);
+    }
+    [ciH, ciM, ciMer].forEach(el => el && el.addEventListener('change', syncCheckIn));
+    syncCheckIn();
+
+    // Sync Check-out hidden field
+    const coH = document.getElementById('checkOutHour');
+    const coM = document.getElementById('checkOutMinute');
+    const coMer = document.getElementById('checkOutMeridiem');
+    const coHidden = document.getElementById('checkOut');
+    function syncCheckOut() {
+        if (coHidden) coHidden.value = formatTime(coH.value, coM.value, coMer.value);
+    }
+    [coH, coM, coMer].forEach(el => el && el.addEventListener('change', syncCheckOut));
+    syncCheckOut();
+});
+
+function removeImage(button) {
+    button.parentElement.parentElement.remove();
+}
+
+async function getAIPrediction() {
+    const formData = {
+        location: document.getElementById('location').value,
+        base_price: parseFloat(document.getElementById('price').value) || 100,
+        property_type: document.getElementById('propertyType').value,
+        amenities_score: 70, // Default value
+        review_rating: 4.0, // Default for new listings
+        booking_lead_time: 7,
+        competitor_price: (parseFloat(document.getElementById('price').value) || 100) * 1.1
+    };
+    
+    if (!formData.location || !formData.base_price) {
+        alert('Please fill in location and price first');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/predict-price', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.predicted_price) {
+            document.getElementById('aiPrice').textContent = '₹' + data.predicted_price.toLocaleString('en-IN');
+            document.getElementById('aiConfidence').textContent = data.confidence;
+            document.getElementById('aiPrediction').style.display = 'block';
+        } else {
+            alert('Unable to get AI prediction. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error getting AI prediction. Please try again.');
+    }
+}
+</script>
